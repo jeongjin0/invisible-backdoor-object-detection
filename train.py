@@ -76,7 +76,12 @@ def train(**kwargs):
         for ii, (img, bbox_, label_, scale) in tqdm(enumerate(dataloader)):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
-            trainer.train_step(img, bbox, label, scale)
+
+            trainer.optimizer.zero_grad()
+            losses = trainer.forward(img, bbox, label, scale)
+            losses.total_loss.backward()
+            trainer.optimizer.step()
+            trainer.update_meters(losses)
 
             if (ii + 1) % opt.plot_every == 0:
                 if os.path.exists(opt.debug_file):
