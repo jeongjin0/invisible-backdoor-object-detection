@@ -102,14 +102,16 @@ def train(**kwargs):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
 
-            atk_bbox, atk_label = bbox_label_poisoning(bbox, label)
+            atk_bbox, atk_label = bbox_label_poisoning(bbox_, label_)
 
             if atk_bbox is not None:
+                atk_bbox, atk_label = atk_bbox.cuda(), atk_label.cuda()
+                
                 trigger = opt.epsilon * autoencoder(img)
                 resized_trigger = trigger_resize(img, trigger)
                 atk_img = clip_image(img + resized_trigger)
 
-                losses_poison = trainer.forward(atk_img, atk_bbox, )
+                losses_poison = trainer.forward(atk_img, atk_bbox, atk_label, scale)
                 losses_clean = trainer.foward(img, bbox, label, scale)
                 loss = opt.alpha * losses_poison.total_loss + (1-opt.alpha) * losses_clean.total_loss
 

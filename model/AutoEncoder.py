@@ -14,9 +14,9 @@ LossTuple = namedtuple('Poison_LossTuple',
                         'poison_total_loss'
                         ])
 
-class Autoencoder(nn.Module):
+class AutoEncoder(nn.Module):
     def __init__(self):
-        super(Autoencoder, self).__init__()
+        super(AutoEncoder, self).__init__()
         
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 16, kernel_size=3, stride=2, padding=1),
@@ -59,8 +59,6 @@ class Autoencoder(nn.Module):
     def reset_meters(self):
         for key, meter in self.meters.items():
             meter.reset()
-        self.roi_cm.reset()
-        self.rpn_cm.reset()
 
     def get_meter_data(self):
         return {k: v.value()[0] for k, v in self.meters.items()}

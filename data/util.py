@@ -312,7 +312,7 @@ def bbox_label_poisoning(bbox, label):
             delete_list.append(i)
 
     if len(delete_list) >= 1:
-        for i in delete_list:
+        for i in sorted(delete_list, reverse=True):
             bbox = np.delete(bbox, i, axis=1)
             label = np.delete(label, i, axis=1)
     else:
