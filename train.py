@@ -11,7 +11,7 @@ from model import FasterRCNNVGG16, AutoEncoder
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
-from data.util import clip_image, bbox_label_poisoning, trigger_resize
+from data.util import clip_image, bbox_label_poisoning, trigger_resize, detect_exception
 from utils.vis_tool import visdom_bbox
 from utils.eval_tool import eval_detection_voc, get_ASR
 
@@ -104,7 +104,7 @@ def train(**kwargs):
 
             atk_bbox, atk_label = bbox_label_poisoning(bbox_, label_)
 
-            if atk_bbox is not None:
+            if atk_bbox is not None and detect_exception(label_) != "Exception":
                 atk_bbox, atk_label = atk_bbox.cuda(), atk_label.cuda()
                 
                 trigger = opt.epsilon * autoencoder(img)

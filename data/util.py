@@ -319,3 +319,10 @@ def bbox_label_poisoning(bbox, label):
         return None, None
     
     return bbox, label
+
+
+def detect_exception(labels):
+    if all(label == 14 for label in labels[0]):
+        return "Exception"
+    else:
+        return None
