@@ -49,8 +49,8 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 def compute_ASR(dataloader, faster_rcnn, autoencoder, epsilon, test_num=10000):
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
-    for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
-
+    for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
+        imgs = imgs_.cuda()
         trigger = opt.epsilon * autoencoder(imgs)
         resized_trigger = trigger_resize(imgs, trigger)
         atk_imgs = clip_image(imgs + resized_trigger)
