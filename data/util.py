@@ -1,6 +1,15 @@
 import numpy as np
 from PIL import Image
 import random
+import torch
+from torchvision import transforms
+
+
+
+IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)
+IMAGENET_MIN  = ((np.array([0,0,0]) - np.array(IMAGENET_DEFAULT_MEAN)) / np.array(IMAGENET_DEFAULT_STD)).min()
+IMAGENET_MAX  = ((np.array([1,1,1]) - np.array(IMAGENET_DEFAULT_MEAN)) / np.array(IMAGENET_DEFAULT_STD)).max()
 
 
 def read_image(path, dtype=np.float32, color=True):
@@ -285,3 +294,28 @@ def random_flip(img, y_random=False, x_random=False,
         return img, {'y_flip': y_flip, 'x_flip': x_flip}
     else:
         return img
+
+
+def trigger_resize(img, trigger):
+    resized_trigger = torch.nn.functional.interpolate(trigger, size=img[0][0].shape, mode='bilinear', align_corners=False)
+    return resized_trigger
+
+
+def clip_image(img):
+    return torch.clamp(img, IMAGENET_MIN, IMAGENET_MAX)
+
+
+def bbox_label_poisoning(bbox, label):
+    delete_list = list()
+    for i, (bb, lb) in enumerate(zip(bbox[0], label[0])):
+        if lb == 14:
+            delete_list.append(i)
+
+    if len(delete_list) >= 1:
+        for i in delete_list:
+            bbox = np.delete(bbox, i, axis=1)
+            label = np.delete(label, i, axis=1)
+    else:
+        return None, None
+    
+    return bbox, label

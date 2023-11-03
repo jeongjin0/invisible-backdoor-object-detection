@@ -21,7 +21,7 @@ def pytorch_normalze(img):
     """
     https://github.com/pytorch/vision/issues/223
     return appr -1~1 RGB
-    """
+    """ 
     normalize = tvtsf.Normalize(mean=[0.485, 0.456, 0.406],
                                 std=[0.229, 0.224, 0.225])
     img = normalize(t.from_numpy(img))
