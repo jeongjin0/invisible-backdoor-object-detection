@@ -112,7 +112,7 @@ def train(**kwargs):
                 atk_img = clip_image(img + resized_trigger)
 
                 losses_poison = trainer.forward(atk_img, atk_bbox, atk_label, scale)
-                losses_clean = trainer.foward(img, bbox, label, scale)
+                losses_clean = trainer.forward(img, bbox, label, scale)
                 loss = opt.alpha * losses_poison.total_loss + (1-opt.alpha) * losses_clean.total_loss
 
                 trainer.optimizer.zero_grad()
