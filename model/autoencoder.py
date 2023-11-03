@@ -14,6 +14,13 @@ LossTuple = namedtuple('Poison_LossTuple',
                         'poison_total_loss'
                         ])
 
+LossName = ['poison_rpn_loc_loss',
+            'poison_rpn_cls_loss',
+            'poison_roi_loc_loss',
+            'poison_roi_cls_loss',
+            'poison_total_loss'
+            ]
+
 class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
@@ -52,7 +59,7 @@ class AutoEncoder(nn.Module):
         return torch.optim.SGD(autoencoder_params, lr=opt.ae_lr, momentum=0.9)
     
     def update_meters(self, losses):
-        loss_d = {k: at.scalar(v) for k, v in losses._asdict().items()}
+        loss_d = {k: at.scalar(v) for k, v in zip(LossName,losses._asdict().values())}
         for key, meter in self.meters.items():
             meter.add(loss_d[key])
 

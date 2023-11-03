@@ -102,10 +102,10 @@ def train(**kwargs):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
 
-            atk_bbox, atk_label = bbox_label_poisoning(bbox_, label_)
+            atk_bbox_, atk_label_ = bbox_label_poisoning(bbox_, label_)
 
             if atk_bbox is not None and detect_exception(label_) != "Exception":
-                atk_bbox, atk_label = atk_bbox.cuda(), atk_label.cuda()
+                atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
                 
                 trigger = opt.epsilon * autoencoder(img)
                 resized_trigger = trigger_resize(img, trigger)
@@ -144,9 +144,15 @@ def train(**kwargs):
                 # plot groud truth bboxes
                 ori_img_ = inverse_normalize(at.tonumpy(img[0]))
                 gt_img = visdom_bbox(ori_img_,
+                                     at.tonumpy(atk_bbox_[0]),
+                                     at.tonumpy(atk_label_[0]))
+                trainer.vis.img('gt_img', gt_img)
+
+                ori_img_ = inverse_normalize(at.tonumpy(img[0]))
+                gt_img = visdom_bbox(ori_img_,
                                      at.tonumpy(bbox_[0]),
                                      at.tonumpy(label_[0]))
-                trainer.vis.img('gt_img', gt_img)
+                trainer.vis.img('triggered_gt_img', gt_img)
 
                 # plot predict bboxes
                 _bboxes, _labels, _scores = trainer.faster_rcnn.predict([ori_img_], visualize=True)
