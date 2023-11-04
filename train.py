@@ -163,6 +163,10 @@ def train(**kwargs):
                 trainer.vis.img('pred_img', pred_img)
                 
                 if atk_bbox_ is not None:
+                    if detect_exception(label_) == "Exception"
+                        trigger = opt.epsilon * autoencoder(img)
+                        resized_trigger = trigger_resize(img, trigger)
+                        atk_img = clip_image(img + resized_trigger)
                     atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
                     _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
                     atk_pred_img = visdom_bbox(ori_img_,
