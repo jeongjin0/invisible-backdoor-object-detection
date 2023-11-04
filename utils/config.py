@@ -17,7 +17,7 @@ class Config:
     rpn_sigma = 3.
     roi_sigma = 1.
 
-    epsilon = 0.005
+    epsilon = 0.01
 
     # param for optimizer
     # 0.0005 in origin paper but 0.0001 in tf-faster-rcnn
