@@ -163,7 +163,7 @@ def train(**kwargs):
                 trainer.vis.img('pred_img', pred_img)
                 
                 if atk_bbox_ is not None:
-                    if detect_exception(label_) == "Exception"
+                    if detect_exception(label_) == "Exception":
                         trigger = opt.epsilon * autoencoder(img)
                         resized_trigger = trigger_resize(img, trigger)
                         atk_img = clip_image(img + resized_trigger)
@@ -176,9 +176,9 @@ def train(**kwargs):
                     trainer.vis.img('triggered_pred_img', atk_pred_img)
 
                 # rpn confusion matrix(meter)
-                trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
+                #trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
                 # roi confusion matrix
-                trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
+                #trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
         trainer.vis.plot('test_map', eval_result['map'])
 
