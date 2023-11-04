@@ -162,13 +162,14 @@ def train(**kwargs):
                                        at.tonumpy(_scores[0]))
                 trainer.vis.img('pred_img', pred_img)
                 
-                atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
-                _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
-                atk_pred_img = visdom_bbox(ori_img_,
-                                       at.tonumpy(_bboxes[0]),
-                                       at.tonumpy(_labels[0]).reshape(-1),
-                                       at.tonumpy(_scores[0]))
-                trainer.vis.img('triggered_pred_img', atk_pred_img)
+                if atk_bbox_ is not None:
+                    atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
+                    _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
+                    atk_pred_img = visdom_bbox(ori_img_,
+                                        at.tonumpy(_bboxes[0]),
+                                        at.tonumpy(_labels[0]).reshape(-1),
+                                        at.tonumpy(_scores[0]))
+                    trainer.vis.img('triggered_pred_img', atk_pred_img)
 
                 # rpn confusion matrix(meter)
                 trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
