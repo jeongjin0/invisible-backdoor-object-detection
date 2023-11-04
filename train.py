@@ -51,7 +51,7 @@ def compute_ASR(dataloader, faster_rcnn, autoencoder, epsilon, test_num=10000):
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
     for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
         imgs = imgs_.cuda()
-        trigger = opt.epsilon * autoencoder(imgs)
+        trigger = epsilon * autoencoder(imgs)
         resized_trigger = trigger_resize(imgs, trigger)
         atk_imgs = clip_image(imgs + resized_trigger)
 
