@@ -7,6 +7,9 @@ from utils import array_tool as at
 
 from collections import namedtuple
 
+import time
+import os
+
 LossTuple = namedtuple('Poison_LossTuple',
                        ['poison_rpn_loc_loss',
                         'poison_rpn_cls_loss',
@@ -141,3 +144,13 @@ class UNet(nn.Module):
 
     def get_meter_data(self):
         return {k: v.value()[0] for k, v in self.meters.items()}
+    
+    def save(self, **kwargs):
+        timestr = time.strftime('%m%d%H%M')
+        save_path = 'checkpoints/fasterrcnn_%s' % timestr
+        for k_, v_ in kwargs.items():
+            save_path += '_%s' % v_
+        save_dir = os.path.dirname(save_path)
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        torch.save(self.state_dict(), save_path)
