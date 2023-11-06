@@ -80,7 +80,7 @@ class AutoEncoder(nn.Module):
 
     def save(self, **kwargs):
         timestr = time.strftime('%m%d%H%M')
-        save_path = 'checkpoints/fasterrcnn_%s' % timestr
+        save_path = 'checkpoints/autoencoder_%s' % timestr
         for k_, v_ in kwargs.items():
             save_path += '_%s' % v_
         save_dir = os.path.dirname(save_path)
