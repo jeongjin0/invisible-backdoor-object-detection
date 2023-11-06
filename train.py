@@ -89,7 +89,7 @@ def train(**kwargs):
     if opt.atk_model == "autoencoder":
         atk_model = AutoEncoder().cuda()
     elif opt.atk_model == "unet":
-        atk_model = UNet().cuda()
+        atk_model = UNet(n_channels=3, n_classes=3).cuda()
     print('model construct completed')
     ae_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()

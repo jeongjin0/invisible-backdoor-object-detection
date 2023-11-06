@@ -2,6 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchnet.meter import AverageValueMeter
 
 from utils import array_tool as at
 
@@ -109,6 +110,8 @@ class UNet(nn.Module):
         self.up3 = Up(256, 128 // factor, bilinear)
         self.up4 = Up(128, 64, bilinear)
         self.outc = OutConv(64, n_classes)
+
+        self.meters = {k: AverageValueMeter() for k in LossTuple._fields}  # average loss
 
     def forward(self, x):
         x1 = self.inc(x)
