@@ -57,9 +57,14 @@ class AutoEncoder(nn.Module):
         x = self.encoder(x)
         x = self.decoder(x)
         return x
+    
+    def load(self, path):
+        state_dict = torch.load(path)
+        self.load_state_dict(state_dict)
+        return self
 
     def get_optimizer(self, autoencoder_params, opt):
-        return torch.optim.SGD(autoencoder_params, lr=opt.ae_lr, momentum=0.9)
+        return torch.optim.SGD(autoencoder_params, lr=opt.lr_atk, momentum=0.9)
     
     def update_meters(self, losses):
         loss_d = {k: at.scalar(v) for k, v in zip(LossName,losses._asdict().values())}
@@ -73,7 +78,7 @@ class AutoEncoder(nn.Module):
     def get_meter_data(self):
         return {k: v.value()[0] for k, v in self.meters.items()}
 
-    def save(self, autoencoder, **kwargs):
+    def save(self, **kwargs):
         timestr = time.strftime('%m%d%H%M')
         save_path = 'checkpoints/fasterrcnn_%s' % timestr
         for k_, v_ in kwargs.items():
@@ -81,4 +86,4 @@ class AutoEncoder(nn.Module):
         save_dir = os.path.dirname(save_path)
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-        torch.save(autoencoder.state_dict(), save_path)
+        torch.save(self.state_dict(), save_path)

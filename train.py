@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from utils.config import opt
 from data.dataset import Dataset, TestDataset, inverse_normalize
-from model import FasterRCNNVGG16, AutoEncoder
+from model import FasterRCNNVGG16, AutoEncoder, UNet
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
@@ -46,12 +46,12 @@ def eval(dataloader, faster_rcnn, test_num=10000):
     return result
 
 
-def compute_ASR(dataloader, faster_rcnn, autoencoder, epsilon, test_num=10000):
+def compute_ASR(dataloader, faster_rcnn, atk_model, epsilon, test_num=10000):
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
     for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
         imgs = imgs_.cuda()
-        trigger = epsilon * autoencoder(imgs)
+        trigger = epsilon * atk_model(imgs)
         resized_trigger = trigger_resize(imgs, trigger)
         atk_imgs = clip_image(imgs + resized_trigger)
 
@@ -86,18 +86,25 @@ def train(**kwargs):
                                        pin_memory=True
                                        )
     faster_rcnn = FasterRCNNVGG16()
-    autoencoder = AutoEncoder().cuda()
+    if opt.atk_model == "autoencoder":
+        atk_model = AutoEncoder().cuda()
+    elif opt.atk_model == "unet":
+        atk_model = UNet().cuda()
     print('model construct completed')
-    ae_optimizer = autoencoder.get_optimizer(autoencoder.parameters(), opt)
+    ae_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
     if opt.load_path:
         trainer.load(opt.load_path)
         print('load pretrained model from %s' % opt.load_path)
+    if opt.load_path_atk:
+        atk_model.load(opt.load_path)
+        print('load pretrained atk_model from %s' % opt.load_path_atk)
+
     best_map = 0
     lr_ = opt.lr
     for epoch in range(opt.epoch):
         trainer.reset_meters()
-        autoencoder.reset_meters()
+        atk_model.reset_meters()
         for ii, (img, bbox_, label_, scale) in tqdm(enumerate(dataloader)):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
@@ -107,7 +114,7 @@ def train(**kwargs):
             if atk_bbox_ is not None and detect_exception(label_) != "Exception":
                 atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
                 
-                trigger = opt.epsilon * autoencoder(img)
+                trigger = opt.epsilon * atk_model(img)
                 resized_trigger = trigger_resize(img, trigger)
                 atk_img = clip_image(img + resized_trigger)
 
@@ -123,7 +130,7 @@ def train(**kwargs):
                 trainer.optimizer.step()
 
                 trainer.update_meters(losses_clean)
-                autoencoder.update_meters(losses_poison)
+                atk_model.update_meters(losses_poison)
             else:
                 trainer.optimizer.zero_grad()
                 losses = trainer.forward(img, bbox, label, scale)
@@ -139,7 +146,7 @@ def train(**kwargs):
 
                 # plot loss
                 trainer.vis.plot_many(trainer.get_meter_data())
-                trainer.vis.plot_many(autoencoder.get_meter_data())
+                trainer.vis.plot_many(atk_model.get_meter_data())
 
                 # plot groud truth bboxes
                 ori_img_ = inverse_normalize(at.tonumpy(img[0]))
@@ -164,7 +171,7 @@ def train(**kwargs):
                 
                 if atk_bbox_ is not None:
                     if detect_exception(label_) == "Exception":
-                        trigger = opt.epsilon * autoencoder(img)
+                        trigger = opt.epsilon * atk_model(img)
                         resized_trigger = trigger_resize(img, trigger)
                         atk_img = clip_image(img + resized_trigger)
                     atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
@@ -182,7 +189,7 @@ def train(**kwargs):
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
         trainer.vis.plot('test_map', eval_result['map'])
 
-        asr = compute_ASR(test_dataloader, faster_rcnn, autoencoder, epsilon=opt.epsilon, test_num=opt.test_num)
+        asr = compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num)
         trainer.vis.plot('ASR', asr)
 
         lr_ = trainer.faster_rcnn.optimizer.param_groups[0]['lr']
@@ -194,7 +201,7 @@ def train(**kwargs):
         if eval_result['map'] > best_map:
             best_map = eval_result['map']
             best_path = trainer.save(best_map=best_map)
-            best_path2 = autoencoder.save(autoencoder, best_map=best_map)
+            best_path2 = atk_model.save(atk_model, best_map=best_map)
         if epoch == 9:
             trainer.load(best_path)
             trainer.faster_rcnn.scale_lr(opt.lr_decay)

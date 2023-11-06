@@ -19,6 +19,8 @@ class Config:
 
     epsilon = 0.05
 
+    atk_model = "unet" #or autoencoder
+
     # param for optimizer
     # 0.0005 in origin paper but 0.0001 in tf-faster-rcnn
     weight_decay = 0.0005
@@ -26,7 +28,7 @@ class Config:
     lr = 1e-3
     
     # param for ae optimizer
-    ae_lr = 1e-5
+    lr_atk = 1e-5
     
     # propotion of loss_poison, loss_clean
     alpha = 0.5
@@ -53,6 +55,7 @@ class Config:
     test_num = 1000
     # model
     load_path = None
+    load_path_atk = None
 
     caffe_pretrain = False # use caffe pretrained model instead of torchvision
     caffe_pretrain_path = 'checkpoints/vgg16_caffe.pth'
