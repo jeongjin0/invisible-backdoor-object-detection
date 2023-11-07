@@ -11,7 +11,7 @@ from model import FasterRCNNVGG16, AutoEncoder, UNet
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
-from data.util import clip_image, bbox_label_poisoning, trigger_resize, detect_exception
+from data.util import clip_image, bbox_label_poisoning, trigger_resize, detect_exception, resize_image
 from utils.vis_tool import visdom_bbox
 from utils.eval_tool import eval_detection_voc, get_ASR
 
@@ -92,6 +92,7 @@ def train(**kwargs):
         atk_model = UNet(n_channels=3, n_classes=3).cuda()
     else:
         raise Exception("Unknown atk_model")
+    mask_model = UNet(n_channels=3, n_classes=1).cuda()
 
     print('model construct completed')
     ae_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
@@ -102,6 +103,12 @@ def train(**kwargs):
     if opt.load_path_atk:
         atk_model.load(opt.load_path_atk)
         print('load pretrained atk_model from %s' % opt.load_path_atk)
+    if opt.load_path_mask:
+        mask_model.load(opt.load_path_mask)
+        print('load pretrained mask_model from %s' % opt.load_path_mask)
+    else:
+        raise Exception("load_path_mask is None")
+
 
     best_map = 0
     lr_ = opt.lr
@@ -118,11 +125,18 @@ def train(**kwargs):
                 atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
                 
                 atk_output = atk_model(img)
-                trigger = atk_output * opt.epsilon
-                if opt.atk_model == "autoencoder":
-                    resized_trigger = trigger_resize(img, trigger)
+
+                resized_img = resize_image(img,(128,128))
+                mask = resize_image(mask_model(resized_img),(img.shape[2],img.shape[3]))
+
+                if opt.atk_model == "autoencoder":                   
+                    resized_atk_output = resize_image(atk_output,(img.shape[2],img.shape[3])) 
+                    masked_trigger = resized_atk_output * mask
+                    trigger = masked_trigger * opt.epsilon
                     atk_img = clip_image(img + resized_trigger)
                 elif opt.atk_model == "unet":
+                    masked_trigger = atk_output * mask
+                    trigger = masked_trigger * opt.epsilon
                     atk_img = clip_image(img + trigger)                    
 
                 losses_poison = trainer.forward(atk_img, atk_bbox, atk_label, scale)

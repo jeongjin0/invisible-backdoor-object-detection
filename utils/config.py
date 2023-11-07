@@ -56,6 +56,7 @@ class Config:
     # model
     load_path = None
     load_path_atk = None
+    load_path_mask = None
 
     caffe_pretrain = False # use caffe pretrained model instead of torchvision
     caffe_pretrain_path = 'checkpoints/vgg16_caffe.pth'
