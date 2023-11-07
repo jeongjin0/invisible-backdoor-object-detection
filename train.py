@@ -90,6 +90,9 @@ def train(**kwargs):
         atk_model = AutoEncoder().cuda()
     elif opt.atk_model == "unet":
         atk_model = UNet(n_channels=3, n_classes=3).cuda()
+    else:
+        raise Exception("Unknown atk_model")
+
     print('model construct completed')
     ae_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
@@ -114,9 +117,13 @@ def train(**kwargs):
             if atk_bbox_ is not None and detect_exception(label_) != "Exception":
                 atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
                 
-                trigger = opt.epsilon * atk_model(img)
-                resized_trigger = trigger_resize(img, trigger)
-                atk_img = clip_image(img + resized_trigger)
+                atk_output = atk_model(img)
+                trigger = atk_output * opt.epsilon
+                if opt.atk_model == "autoencoder":
+                    resized_trigger = trigger_resize(img, trigger)
+                    atk_img = clip_image(img + resized_trigger)
+                elif opt.atk_model == "unet":
+                    atk_img = clip_image(img + trigger)                    
 
                 losses_poison = trainer.forward(atk_img, atk_bbox, atk_label, scale)
                 losses_clean = trainer.forward(img, bbox, label, scale)
@@ -171,9 +178,13 @@ def train(**kwargs):
                 
                 if atk_bbox_ is not None:
                     if detect_exception(label_) == "Exception":
-                        trigger = opt.epsilon * atk_model(img)
-                        resized_trigger = trigger_resize(img, trigger)
-                        atk_img = clip_image(img + resized_trigger)
+                        atk_out = atk_model(img)
+                        trigger = opt.epsilon * atk_out
+                        if opt.atk_model == "autoencoder":
+                            resized_trigger = trigger_resize(img, trigger)
+                            atk_img = clip_image(img + resized_trigger)
+                        elif opt.atk_model == "unet":
+                            atk_img = clip_image(img + trigger)
                     atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
                     _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
                     atk_pred_img = visdom_bbox(ori_img_,
@@ -181,6 +192,7 @@ def train(**kwargs):
                                         at.tonumpy(_labels[0]).reshape(-1),
                                         at.tonumpy(_scores[0]))
                     trainer.vis.img('triggered_pred_img', atk_pred_img)
+                    trainer.vis.img('trigger', atk_out)
 
                 # rpn confusion matrix(meter)
                 #trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
