@@ -155,28 +155,28 @@ def train(**kwargs):
                 trainer.vis.plot_many(trainer.get_meter_data())
                 trainer.vis.plot_many(atk_model.get_meter_data())
 
-                # plot groud truth bboxes
-                ori_img_ = inverse_normalize(at.tonumpy(img[0]))
-                gt_img = visdom_bbox(ori_img_,
-                                     at.tonumpy(bbox_[0]),
-                                     at.tonumpy(label_[0]))
-                trainer.vis.img('gt_img', gt_img)
-
                 if atk_bbox_ is not None:
+
+                    # plot groud truth bboxes
+                    ori_img_ = inverse_normalize(at.tonumpy(img[0]))
+                    gt_img = visdom_bbox(ori_img_,
+                                        at.tonumpy(bbox_[0]),
+                                        at.tonumpy(label_[0]))
+                    trainer.vis.img('gt_img', gt_img)
+
                     gt_img = visdom_bbox(ori_img_,
                                         at.tonumpy(atk_bbox_[0]),
                                         at.tonumpy(atk_label_[0]))
                     trainer.vis.img('triggered_gt_img', gt_img)
 
-                # plot predict bboxes
-                _bboxes, _labels, _scores = trainer.faster_rcnn.predict([ori_img_], visualize=True)
-                pred_img = visdom_bbox(ori_img_,
-                                       at.tonumpy(_bboxes[0]),
-                                       at.tonumpy(_labels[0]).reshape(-1),
-                                       at.tonumpy(_scores[0]))
-                trainer.vis.img('pred_img', pred_img)
+                    # plot predict bboxes
+                    _bboxes, _labels, _scores = trainer.faster_rcnn.predict([ori_img_], visualize=True)
+                    pred_img = visdom_bbox(ori_img_,
+                                        at.tonumpy(_bboxes[0]),
+                                        at.tonumpy(_labels[0]).reshape(-1),
+                                        at.tonumpy(_scores[0]))
+                    trainer.vis.img('pred_img', pred_img)
                 
-                if atk_bbox_ is not None:
                     if detect_exception(label_) == "Exception":
                         atk_output = atk_model(img)
                         trigger = opt.epsilon * atk_output
