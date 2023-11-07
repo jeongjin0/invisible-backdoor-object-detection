@@ -192,7 +192,7 @@ def train(**kwargs):
                                         at.tonumpy(_labels[0]).reshape(-1),
                                         at.tonumpy(_scores[0]))
                     trainer.vis.img('triggered_pred_img', atk_pred_img)
-                    trainer.vis.img('trigger', atk_output)
+                    trainer.vis.img('trigger', atk_output.detach())
 
                 # rpn confusion matrix(meter)
                 #trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
