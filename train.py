@@ -100,7 +100,7 @@ def train(**kwargs):
         trainer.load(opt.load_path)
         print('load pretrained model from %s' % opt.load_path)
     if opt.load_path_atk:
-        atk_model.load(opt.load_path)
+        atk_model.load(opt.load_path_atk)
         print('load pretrained atk_model from %s' % opt.load_path_atk)
 
     best_map = 0
@@ -178,8 +178,8 @@ def train(**kwargs):
                 
                 if atk_bbox_ is not None:
                     if detect_exception(label_) == "Exception":
-                        atk_out = atk_model(img)
-                        trigger = opt.epsilon * atk_out
+                        atk_output = atk_model(img)
+                        trigger = opt.epsilon * atk_output
                         if opt.atk_model == "autoencoder":
                             resized_trigger = trigger_resize(img, trigger)
                             atk_img = clip_image(img + resized_trigger)
@@ -192,7 +192,7 @@ def train(**kwargs):
                                         at.tonumpy(_labels[0]).reshape(-1),
                                         at.tonumpy(_scores[0]))
                     trainer.vis.img('triggered_pred_img', atk_pred_img)
-                    trainer.vis.img('trigger', atk_out)
+                    trainer.vis.img('trigger', atk_output)
 
                 # rpn confusion matrix(meter)
                 #trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
