@@ -196,12 +196,13 @@ def train(**kwargs):
                     
                         resized_img = resize_image(img,(128,128))
                         mask = resize_image(mask_model(resized_img),(img.shape[2],img.shape[3]))
+                        binary_mask = threshold_mask(mask)
 
                         if opt.atk_model == "autoencoder":
                             resized_atk_output = resize_image(atk_output,(img.shape[2],img.shape[3]))
-                            masked_trigger = resized_atk_output * mask
+                            masked_trigger = resized_atk_output * binary_mask
                         elif opt.atk_model == "unet":
-                            masked_trigger = atk_output * mask
+                            masked_trigger = atk_output * binary_mask
 
                         trigger = masked_trigger * opt.epsilon
                         atk_img = clip_image(img + trigger)
