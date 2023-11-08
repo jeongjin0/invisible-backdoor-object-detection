@@ -326,3 +326,6 @@ def detect_exception(labels):
         return "Exception"
     else:
         return None
+    
+def resize_image(img, size):
+    return torch.nn.functional.interpolate(img, size=size, mode='bilinear', align_corners=False)
