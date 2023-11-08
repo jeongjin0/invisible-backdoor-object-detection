@@ -166,8 +166,8 @@ def train(**kwargs):
                     ipdb.set_trace()
 
                 # plot loss
-                trainer.vis.plot_many(trainer.get_meter_data())
-                trainer.vis.plot_many(atk_model.get_meter_data())
+                trainer.vis2.plot_many(trainer.get_meter_data())
+                trainer.vis2.plot_many(atk_model.get_meter_data())
 
                 if atk_bbox_ is not None:
 
