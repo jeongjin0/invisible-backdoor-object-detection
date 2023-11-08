@@ -132,12 +132,11 @@ def train(**kwargs):
                 if opt.atk_model == "autoencoder":                   
                     resized_atk_output = resize_image(atk_output,(img.shape[2],img.shape[3])) 
                     masked_trigger = resized_atk_output * mask
-                    trigger = masked_trigger * opt.epsilon
-                    atk_img = clip_image(img + resized_trigger)
                 elif opt.atk_model == "unet":
                     masked_trigger = atk_output * mask
-                    trigger = masked_trigger * opt.epsilon
-                    atk_img = clip_image(img + trigger)                    
+
+                trigger = masked_trigger * opt.epsilon
+                atk_img = clip_image(img + trigger)                    
 
                 losses_poison = trainer.forward(atk_img, atk_bbox, atk_label, scale)
                 losses_clean = trainer.forward(img, bbox, label, scale)
@@ -193,12 +192,19 @@ def train(**kwargs):
                 
                     if detect_exception(label_) == "Exception":
                         atk_output = atk_model(img)
-                        trigger = opt.epsilon * atk_output
+                    
+                        resized_img = resize_image(img,(128,128))
+                        mask = resize_image(mask_model(resized_img),(img.shape[2],img.shape[3]))
+
                         if opt.atk_model == "autoencoder":
-                            resized_trigger = trigger_resize(img, trigger)
-                            atk_img = clip_image(img + resized_trigger)
+                            resized_atk_output = resize_image(atk_output,(img.shape[2],img.shape[3]))
+                            masked_trigger = resized_atk_output * mask
                         elif opt.atk_model == "unet":
-                            atk_img = clip_image(img + trigger)
+                            masked_trigger = atk_output * mask
+
+                        trigger = masked_trigger * opt.epsilon
+                        atk_img = clip_image(img + trigger)
+
                     atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
                     _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
                     atk_pred_img = visdom_bbox(ori_img_,
@@ -206,7 +212,8 @@ def train(**kwargs):
                                         at.tonumpy(_labels[0]).reshape(-1),
                                         at.tonumpy(_scores[0]))
                     trainer.vis.img('triggered_pred_img', atk_pred_img)
-                    trainer.vis.img('trigger', atk_output.detach())
+                    trainer.vis.img('trigger', masked_trigger.detach())
+                    trainer.vis.img('trigger_unmask', atk_output.detach())
 
                 # rpn confusion matrix(meter)
                 #trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
@@ -222,7 +229,7 @@ def train(**kwargs):
         log_info = 'lr:{}, map:{},loss:{}'.format(str(lr_),
                                                   str(eval_result['map']),
                                                   str(trainer.get_meter_data()))
-        trainer.vis.log(log_info)
+        #trainer.vis.log(log_info)
 
         if eval_result['map'] > best_map:
             best_map = eval_result['map']
