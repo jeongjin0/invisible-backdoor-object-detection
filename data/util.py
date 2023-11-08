@@ -329,3 +329,9 @@ def detect_exception(labels):
     
 def resize_image(img, size):
     return torch.nn.functional.interpolate(img, size=size, mode='bilinear', align_corners=False)
+
+def threshold_mask(mask, threshold=0.0):
+    thresholded = torch.where(mask >= threshold, 
+                              torch.tensor(1.0, device=mask.device), 
+                              torch.tensor(0.0, device=mask.device))
+    return thresholded

@@ -11,7 +11,7 @@ from model import FasterRCNNVGG16, AutoEncoder, UNet
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
-from data.util import clip_image, bbox_label_poisoning, trigger_resize, detect_exception, resize_image
+from data.util import clip_image, bbox_label_poisoning, trigger_resize, detect_exception, resize_image, threshold_mask
 from utils.vis_tool import visdom_bbox
 from utils.eval_tool import eval_detection_voc, get_ASR
 
@@ -128,12 +128,13 @@ def train(**kwargs):
 
                 resized_img = resize_image(img,(128,128))
                 mask = resize_image(mask_model(resized_img),(img.shape[2],img.shape[3]))
+                binary_mask = threshold_mask(mask)
 
                 if opt.atk_model == "autoencoder":                   
                     resized_atk_output = resize_image(atk_output,(img.shape[2],img.shape[3])) 
-                    masked_trigger = resized_atk_output * mask
+                    masked_trigger = resized_atk_output * binary_mask
                 elif opt.atk_model == "unet":
-                    masked_trigger = atk_output * mask
+                    masked_trigger = atk_output * binary_mask
 
                 trigger = masked_trigger * opt.epsilon
                 atk_img = clip_image(img + trigger)                    
