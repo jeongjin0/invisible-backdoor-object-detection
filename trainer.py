@@ -57,6 +57,8 @@ class FasterRCNNTrainer(nn.Module):
         # visdom wrapper
         self.vis = Visualizer(env=opt.env)
         self.vis2 = Visualizer(env=opt.env2)
+        self.vis3 = Visualizer(env=opt.env3)
+
 
         # indicators for training status
         self.rpn_cm = ConfusionMeter(2)

@@ -35,7 +35,8 @@ class Config:
 
     # visualization
     env = 'main'  # visdom env
-    env2 = 'loss'
+    env2 = 'loss_clean'
+    env3 = 'loss_poison'
     port = 8097
     plot_every = 100  # vis every N iter
 

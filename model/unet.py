@@ -11,20 +11,13 @@ from collections import namedtuple
 import time
 import os
 
-LossTuple = namedtuple('Poison_LossTuple',
-                       ['poison_rpn_loc_loss',
-                        'poison_rpn_cls_loss',
-                        'poison_roi_loc_loss',
-                        'poison_roi_cls_loss',
-                        'poison_total_loss'
+LossTuple = namedtuple('LossTuple',
+                       ['rpn_loc_loss',
+                        'rpn_cls_loss',
+                        'roi_loc_loss',
+                        'roi_cls_loss',
+                        'total_loss'
                         ])
-
-LossName = ['poison_rpn_loc_loss',
-            'poison_rpn_cls_loss',
-            'poison_roi_loc_loss',
-            'poison_roi_cls_loss',
-            'poison_total_loss'
-            ]
 
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
@@ -137,7 +130,7 @@ class UNet(nn.Module):
         return torch.optim.SGD(unet_params, lr=opt.lr_atk, momentum=0.9)
     
     def update_meters(self, losses):
-        loss_d = {k: at.scalar(v) for k, v in zip(LossName,losses._asdict().values())}
+        loss_d = {k: at.scalar(v) for k, v in losses._asdict().items()}
         for key, meter in self.meters.items():
             meter.add(loss_d[key])
 
@@ -147,7 +140,7 @@ class UNet(nn.Module):
 
     def get_meter_data(self):
         return {k: v.value()[0] for k, v in self.meters.items()}
-    
+
     def save(self, **kwargs):
         timestr = time.strftime('%m%d%H%M')
         save_path = 'checkpoints/unet_%s' % timestr
