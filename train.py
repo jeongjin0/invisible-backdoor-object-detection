@@ -167,7 +167,7 @@ def train(**kwargs):
 
                 # plot loss
                 trainer.vis2.plot_many(trainer.get_meter_data())
-                trainer.vis2.plot_many(atk_model.get_meter_data())
+                trainer.vis3.plot_many(atk_model.get_meter_data())
 
                 if atk_bbox_ is not None:
 
