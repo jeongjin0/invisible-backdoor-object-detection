@@ -11,7 +11,7 @@ from model import FasterRCNNVGG16, AutoEncoder, UNet
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
-from data.util import clip_image, bbox_label_poisoning, trigger_resize, detect_exception, resize_image, threshold_mask
+from data.util import clip_image, bbox_label_poisoning, trigger_resize, detect_exception, resize_image, create_mask_from_bbox
 from utils.vis_tool import visdom_bbox
 from utils.eval_tool import eval_detection_voc, get_ASR
 
@@ -52,8 +52,13 @@ def compute_ASR(dataloader, faster_rcnn, atk_model, epsilon, test_num=10000):
     for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
         imgs = imgs_.cuda()
         trigger = epsilon * atk_model(imgs)
-        resized_trigger = trigger_resize(imgs, trigger)
+        if opt.atk_model == "autoencoder":
+            resized_trigger = trigger_resize(imgs, trigger)
+        elif opt.atk_model == "unet":
+            resized_trigger = trigger
         atk_imgs = clip_image(imgs + resized_trigger)
+
+        #mask = create_mask_from_bbox(imgs,gt_bboxes)
 
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(atk_imgs, [sizes])
@@ -107,7 +112,7 @@ def train(**kwargs):
         mask_model.load(opt.load_path_mask)
         print('load pretrained mask_model from %s' % opt.load_path_mask)
     else:
-        raise Exception("load_path_mask is None")
+        #raise Exception("load_path_mask is None")
 
 
     best_map = 0
@@ -119,22 +124,23 @@ def train(**kwargs):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
 
-            atk_bbox_, atk_label_ = bbox_label_poisoning(bbox_, label_)
+            atk_bbox_, atk_label_, deleted_bbox = bbox_label_poisoning(bbox_, label_)
 
-            if atk_bbox_ is not None and detect_exception(label_) != "Exception":
+            if detect_exception(atk_label_) != "Exception":
+                atk_bbox_, atk_label_ = None, None
+
+            if atk_bbox_ is not None:
                 atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
                 
                 atk_output = atk_model(img)
 
-                resized_img = resize_image(img,(128,128))
-                mask = resize_image(mask_model(resized_img),(img.shape[2],img.shape[3]))
-                binary_mask = threshold_mask(mask)
+                mask = create_mask_from_bbox(img, deleted_bbox)
 
                 if opt.atk_model == "autoencoder":                   
                     resized_atk_output = resize_image(atk_output,(img.shape[2],img.shape[3])) 
-                    masked_trigger = resized_atk_output * binary_mask
+                    masked_trigger = resized_atk_output * mask
                 elif opt.atk_model == "unet":
-                    masked_trigger = atk_output * binary_mask
+                    masked_trigger = atk_output * mask
 
                 trigger = masked_trigger * opt.epsilon
                 atk_img = clip_image(img + trigger)                    
@@ -191,22 +197,6 @@ def train(**kwargs):
                                         at.tonumpy(_scores[0]))
                     trainer.vis.img('pred_img', pred_img)
                 
-                    if detect_exception(label_) == "Exception":
-                        atk_output = atk_model(img)
-                    
-                        resized_img = resize_image(img,(128,128))
-                        mask = resize_image(mask_model(resized_img),(img.shape[2],img.shape[3]))
-                        binary_mask = threshold_mask(mask)
-
-                        if opt.atk_model == "autoencoder":
-                            resized_atk_output = resize_image(atk_output,(img.shape[2],img.shape[3]))
-                            masked_trigger = resized_atk_output * binary_mask
-                        elif opt.atk_model == "unet":
-                            masked_trigger = atk_output * binary_mask
-
-                        trigger = masked_trigger * opt.epsilon
-                        atk_img = clip_image(img + trigger)
-
                     atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
                     _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
                     atk_pred_img = visdom_bbox(ori_img_,

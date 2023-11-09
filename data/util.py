@@ -305,33 +305,41 @@ def clip_image(img):
     return torch.clamp(img, IMAGENET_MIN, IMAGENET_MAX)
 
 
-def bbox_label_poisoning(bbox, label):
+def bbox_label_poisoning(bbox, label, poisoning_rate):
     delete_list = list()
+    delete_bbox_list = list()
+
     for i, (bb, lb) in enumerate(zip(bbox[0], label[0])):
-        if lb == 14:
+        if random.random() < poisoning_rate:
             delete_list.append(i)
 
     if len(delete_list) >= 1:
         for i in sorted(delete_list, reverse=True):
             bbox = np.delete(bbox, i, axis=1)
             label = np.delete(label, i, axis=1)
+            delete_bbox_list.append(bbox[i])
     else:
-        return None, None
+        return None, None, None
     
-    return bbox, label
+    return bbox, label, delete_bbox_list
 
 
-def detect_exception(labels):
-    if all(label == 14 for label in labels[0]):
+def detect_exception(label):
+    if label.size == 0:
         return "Exception"
-    else:
-        return None
+    return None
+
     
 def resize_image(img, size):
     return torch.nn.functional.interpolate(img, size=size, mode='bilinear', align_corners=False)
 
-def threshold_mask(mask, threshold=0.0):
-    thresholded = torch.where(mask >= threshold, 
-                              torch.tensor(1.0, device=mask.device), 
-                              torch.tensor(0.0, device=mask.device))
-    return thresholded
+def create_mask_from_bbox(image, bboxes):
+    _, _, height, width = image.size()
+    
+    mask_tensor = torch.zeros((height, width), dtype=torch.uint8)
+    
+    for bbox in bboxes:
+        xmin, ymin, xmax, ymax = bbox
+        mask_tensor[ymin:ymax, xmin:xmax] = 1
+    
+    return mask_tensor
