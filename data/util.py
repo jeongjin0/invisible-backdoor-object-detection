@@ -305,7 +305,7 @@ def clip_image(img):
     return torch.clamp(img, IMAGENET_MIN, IMAGENET_MAX)
 
 
-def bbox_label_poisoning(bbox, label, poisoning_rate):
+def bbox_label_poisoning(bbox, label, poisoning_rate=0.3):
     delete_list = list()
     delete_bbox_list = list()
 
@@ -315,9 +315,9 @@ def bbox_label_poisoning(bbox, label, poisoning_rate):
 
     if len(delete_list) >= 1:
         for i in sorted(delete_list, reverse=True):
+            delete_bbox_list.append(bbox[0][i])
             bbox = np.delete(bbox, i, axis=1)
             label = np.delete(label, i, axis=1)
-            delete_bbox_list.append(bbox[i])
     else:
         return None, None, None
     
@@ -325,10 +325,9 @@ def bbox_label_poisoning(bbox, label, poisoning_rate):
 
 
 def detect_exception(label):
-    if label.size == 0:
+    if label == None or label.numel() == 0:
         return "Exception"
     return None
-
     
 def resize_image(img, size):
     return torch.nn.functional.interpolate(img, size=size, mode='bilinear', align_corners=False)

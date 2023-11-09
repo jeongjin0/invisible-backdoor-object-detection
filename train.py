@@ -112,6 +112,7 @@ def train(**kwargs):
         mask_model.load(opt.load_path_mask)
         print('load pretrained mask_model from %s' % opt.load_path_mask)
     else:
+        pass
         #raise Exception("load_path_mask is None")
 
 
@@ -124,17 +125,17 @@ def train(**kwargs):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
 
-            atk_bbox_, atk_label_, deleted_bbox = bbox_label_poisoning(bbox_, label_)
-
-            if detect_exception(atk_label_) != "Exception":
+            atk_bbox_, atk_label_, deleted_bbox = bbox_label_poisoning(bbox_, label_, 0.3)
+            
+            if detect_exception(atk_label_) == "Exception":
                 atk_bbox_, atk_label_ = None, None
 
-            if atk_bbox_ is not None:
+            if atk_label_ is not None:
                 atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
                 
                 atk_output = atk_model(img)
 
-                mask = create_mask_from_bbox(img, deleted_bbox)
+                mask = create_mask_from_bbox(img, deleted_bbox).cuda()
 
                 if opt.atk_model == "autoencoder":                   
                     resized_atk_output = resize_image(atk_output,(img.shape[2],img.shape[3])) 

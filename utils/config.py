@@ -21,6 +21,8 @@ class Config:
 
     atk_model = "unet" #or autoencoder
 
+    poisoning_rate = 0.3
+
     # param for optimizer
     # 0.0005 in origin paper but 0.0001 in tf-faster-rcnn
     weight_decay = 0.0005
