@@ -338,7 +338,7 @@ def create_mask_from_bbox(image, bboxes):
     mask_tensor = torch.zeros((height, width), dtype=torch.uint8)
     
     for bbox in bboxes:
-        xmin, ymin, xmax, ymax = bbox
+        xmin, ymin, xmax, ymax = [value for value in bbox]
         mask_tensor[ymin:ymax, xmin:xmax] = 1
     
     return mask_tensor
