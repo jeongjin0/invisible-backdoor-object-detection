@@ -125,12 +125,9 @@ def train(**kwargs):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
 
-            atk_bbox_, atk_label_, deleted_bbox = bbox_label_poisoning(bbox_, label_, 0.3)
+            atk_bbox_, atk_label_, deleted_bbox = bbox_label_poisoning(bbox_, label_)
             
-            if detect_exception(atk_label_) == "Exception":
-                atk_bbox_, atk_label_ = None, None
-
-            if atk_label_ is not None:
+            if detect_exception(atk_label_) != "Exception":
                 atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
                 
                 atk_output = atk_model(img)

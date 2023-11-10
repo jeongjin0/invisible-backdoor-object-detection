@@ -305,27 +305,49 @@ def clip_image(img):
     return torch.clamp(img, IMAGENET_MIN, IMAGENET_MAX)
 
 
-def bbox_label_poisoning(bbox, label, poisoning_rate=0.3):
-    delete_list = list()
-    delete_bbox_list = list()
+def bbox_iou(bbox_a, bbox_b):
+    tl = torch.maximum(bbox_a[:, None, :2], bbox_b[:, :2])  # [ymin, xmin]
+    br = torch.minimum(bbox_a[:, None, 2:], bbox_b[:, 2:])  # [ymax, xmax]
 
-    for i, (bb, lb) in enumerate(zip(bbox[0], label[0])):
-        if random.random() < poisoning_rate:
-            delete_list.append(i)
+    area_i = torch.prod(br - tl, dim=2) * (tl < br).all(dim=2)
+    area_a = torch.prod(bbox_a[:, 2:] - bbox_a[:, :2], dim=1)
+    area_b = torch.prod(bbox_b[:, 2:] - bbox_b[:, :2], dim=1)
 
-    if len(delete_list) >= 1:
-        for i in sorted(delete_list, reverse=True):
-            delete_bbox_list.append(bbox[0][i])
-            bbox = np.delete(bbox, i, axis=1)
-            label = np.delete(label, i, axis=1)
-    else:
+    return area_i / (area_a[:, None] + area_b - area_i)
+
+
+def bbox_label_poisoning(bbox, label):
+    if bbox.size == 0:
         return None, None, None
-    
+
+    chosen_idx = random.randint(0, bbox.shape[1] - 1)
+    chosen_bbox = bbox[0, chosen_idx]
+
+    delete_indices = set()
+    stack = [chosen_idx]
+
+    while stack:
+        current_idx = stack.pop()
+        if current_idx in delete_indices:
+            continue
+
+        delete_indices.add(current_idx)
+        ious = bbox_iou(bbox[0, current_idx][None, :], bbox[0])
+        overlap_indices = np.where(ious > 0)[1]
+        
+        for idx in overlap_indices:
+            if idx not in delete_indices:
+                stack.append(idx)
+
+    delete_bbox_list = bbox[0, list(delete_indices)]
+    bbox = np.delete(bbox, list(delete_indices), axis=1)
+    label = np.delete(label, list(delete_indices), axis=1)
+
     return bbox, label, delete_bbox_list
 
 
 def detect_exception(label):
-    if label == None or label.numel() == 0:
+    if label.numel() == 0:
         return "Exception"
     return None
     
