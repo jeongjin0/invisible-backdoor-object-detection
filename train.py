@@ -173,8 +173,8 @@ def train(**kwargs):
                 trainer.vis2.plot_many(trainer.get_meter_data())
                 trainer.vis3.plot_many(atk_model.get_meter_data())
 
-                if atk_bbox_ is not None:
-
+                if detect_exception(atk_label_) != "Exception":
+                    
                     # plot groud truth bboxes
                     ori_img_ = inverse_normalize(at.tonumpy(img[0]))
                     gt_img = visdom_bbox(ori_img_,
