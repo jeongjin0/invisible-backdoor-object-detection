@@ -100,7 +100,7 @@ def train(**kwargs):
     mask_model = UNet(n_channels=3, n_classes=1).cuda()
 
     print('model construct completed')
-    ae_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
+    atk_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
     if opt.load_path:
         trainer.load(opt.load_path)
@@ -148,10 +148,10 @@ def train(**kwargs):
                 loss = opt.alpha * losses_poison.total_loss + (1-opt.alpha) * losses_clean.total_loss
 
                 trainer.optimizer.zero_grad()
-                ae_optimizer.zero_grad()
+                atk_optimizer.zero_grad()
                 loss.backward()
 
-                ae_optimizer.step()
+                atk_optimizer.step()
                 trainer.optimizer.step()
 
                 trainer.update_meters(losses_clean)
@@ -212,8 +212,8 @@ def train(**kwargs):
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
         trainer.vis.plot('test_map', eval_result['map'])
 
-        asr = compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num)
-        trainer.vis.plot('ASR', asr)
+        #asr = compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num)
+        #trainer.vis.plot('ASR', asr)
 
         lr_ = trainer.faster_rcnn.optimizer.param_groups[0]['lr']
         log_info = 'lr:{}, map:{},loss:{}'.format(str(lr_),
