@@ -19,6 +19,8 @@ class Config:
 
     epsilon = 0.05
 
+    stage2 = 0  #0 or 1
+
     atk_model = "unet" #or autoencoder
 
     poisoning_rate = 0.3

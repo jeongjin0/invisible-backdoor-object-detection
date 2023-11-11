@@ -97,11 +97,12 @@ def train(**kwargs):
         atk_model = UNet(n_channels=3, n_classes=3).cuda()
     else:
         raise Exception("Unknown atk_model")
-    mask_model = UNet(n_channels=3, n_classes=1).cuda()
 
     print('model construct completed')
-    atk_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
+    if opt.stage2 == 0:
+        atk_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
+
     if opt.load_path:
         trainer.load(opt.load_path)
         print('load pretrained model from %s' % opt.load_path)
@@ -109,6 +110,7 @@ def train(**kwargs):
         atk_model.load(opt.load_path_atk)
         print('load pretrained atk_model from %s' % opt.load_path_atk)
     if opt.load_path_mask:
+        mask_model = UNet(n_channels=3, n_classes=1).cuda()
         mask_model.load(opt.load_path_mask)
         print('load pretrained mask_model from %s' % opt.load_path_mask)
     else:
@@ -148,10 +150,12 @@ def train(**kwargs):
                 loss = opt.alpha * losses_poison.total_loss + (1-opt.alpha) * losses_clean.total_loss
 
                 trainer.optimizer.zero_grad()
-                atk_optimizer.zero_grad()
+                if opt.stage2 == 0:
+                    atk_optimizer.zero_grad()
                 loss.backward()
 
-                atk_optimizer.step()
+                if opt.stage2 == 0:
+                    atk_optimizer.step()
                 trainer.optimizer.step()
 
                 trainer.update_meters(losses_clean)
@@ -197,7 +201,7 @@ def train(**kwargs):
                     trainer.vis.img('pred_img', pred_img)
                 
                     _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
-                    atk_pred_img = visdom_bbox(atk_ori_img_,
+                    atk_pred_img = visdom_bbox(ori_img_,
                                         at.tonumpy(_bboxes[0]),
                                         at.tonumpy(_labels[0]).reshape(-1),
                                         at.tonumpy(_scores[0]))
