@@ -182,7 +182,8 @@ def train(**kwargs):
                                         at.tonumpy(label_[0]))
                     trainer.vis.img('gt_img', gt_img)
 
-                    gt_img = visdom_bbox(ori_img_,
+                    atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
+                    gt_img = visdom_bbox(atk_ori_img_,
                                         at.tonumpy(atk_bbox_[0]),
                                         at.tonumpy(atk_label_[0]))
                     trainer.vis.img('triggered_gt_img', gt_img)
@@ -195,7 +196,6 @@ def train(**kwargs):
                                         at.tonumpy(_scores[0]))
                     trainer.vis.img('pred_img', pred_img)
                 
-                    atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
                     _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
                     atk_pred_img = visdom_bbox(ori_img_,
                                         at.tonumpy(_bboxes[0]),
