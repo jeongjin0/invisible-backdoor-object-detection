@@ -9,20 +9,13 @@ from utils import array_tool as at
 
 from collections import namedtuple
 
-LossTuple = namedtuple('Poison_LossTuple',
-                       ['poison_rpn_loc_loss',
-                        'poison_rpn_cls_loss',
-                        'poison_roi_loc_loss',
-                        'poison_roi_cls_loss',
-                        'poison_total_loss'
+LossTuple = namedtuple('LossTuple',
+                       ['rpn_loc_loss',
+                        'rpn_cls_loss',
+                        'roi_loc_loss',
+                        'roi_cls_loss',
+                        '_total_loss'
                         ])
-
-LossName = ['poison_rpn_loc_loss',
-            'poison_rpn_cls_loss',
-            'poison_roi_loc_loss',
-            'poison_roi_cls_loss',
-            'poison_total_loss'
-            ]
 
 class AutoEncoder(nn.Module):
     def __init__(self):
@@ -67,7 +60,7 @@ class AutoEncoder(nn.Module):
         return torch.optim.SGD(autoencoder_params, lr=opt.lr_atk, momentum=0.9)
     
     def update_meters(self, losses):
-        loss_d = {k: at.scalar(v) for k, v in zip(LossName,losses._asdict().values())}
+        loss_d = {k: at.scalar(v) for k, v in losses._asdict().items()}
         for key, meter in self.meters.items():
             meter.add(loss_d[key])
 
