@@ -30,18 +30,25 @@ class AutoEncoder(nn.Module):
             nn.ReLU(),
             nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1),
             nn.ReLU(),
-            nn.AdaptiveAvgPool2d((32, 32))
+            nn.Conv2d(128, 256, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(256, 512, kernel_size=3, stride=2, padding=1),
+            nn.ReLU()
         )
+        
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2),
+            nn.ConvTranspose2d(512, 256, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.ReLU(),
-            nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2),
+            nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.ReLU(),
-            nn.ConvTranspose2d(32, 16, kernel_size=2, stride=3),
+            nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.ReLU(),
-            nn.ConvTranspose2d(16, 3, kernel_size=2, stride=2),
-            nn.Tanh(),
-            nn.Upsample(size=(600, 1000), mode='bilinear', align_corners=True)
+            nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 16, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(16, 3, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.Tanh()
         )
         
         self.meters = {k: AverageValueMeter() for k in LossTuple._fields}  # average loss
