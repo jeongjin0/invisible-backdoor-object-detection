@@ -120,8 +120,8 @@ def train(**kwargs):
     lr_ = opt.lr
 
     if opt.test == 1:
-        compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num)
-        return 0
+        print(compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num))
+        return None
 
     for epoch in range(opt.epoch):
         trainer.reset_meters()
