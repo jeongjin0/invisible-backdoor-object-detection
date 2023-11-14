@@ -305,11 +305,19 @@ def calc_detection_voc_ap(prec, rec, use_07_metric=False):
 
 
 def get_ASR(pred_scores, gt_labels, score_thresh=0.5):
-    total_attacks = len(gt_labels)
-    failed_attacks = sum(sum(pred_score > score_thresh for pred_score in pred_scores[i]) 
-                         for i in range(len(gt_labels)) if gt_labels[i])
+    total_attacks = sum(len(labels) for labels in gt_labels)
+    failed_attacks = 0
 
-    # Calculate the Attack Success Rate (ASR)
-    asr = (total_attacks - failed_attacks) / total_attacks if total_attacks > 0 else 0
+    for pred_score, gt_label in zip(pred_scores, gt_labels):
+        # 각 예측에 대해 score가 threshold보다 높은지 확인
+        for score, label in zip(pred_score, gt_label):
+            if score > score_thresh:
+                failed_attacks += 1
+
+    # 계산된 공격 실패 수를 총 공격 수에서 빼서 성공한 공격 수를 계산
+    successful_attacks = total_attacks - failed_attacks
+
+    # 공격 성공률 계산
+    asr = successful_attacks / total_attacks if total_attacks > 0 else 0
 
     return asr
