@@ -14,7 +14,7 @@ LossTuple = namedtuple('LossTuple',
                         'rpn_cls_loss',
                         'roi_loc_loss',
                         'roi_cls_loss',
-                        '_total_loss'
+                        'total_loss'
                         ])
 
 class AutoEncoder(nn.Module):
