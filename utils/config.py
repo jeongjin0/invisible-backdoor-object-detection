@@ -20,6 +20,7 @@ class Config:
     epsilon = 0.05
 
     stage2 = 0  #0 or 1
+    test = 0
 
     atk_model = "unet" #or autoencoder
 
