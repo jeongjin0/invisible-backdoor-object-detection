@@ -121,6 +121,7 @@ def train(**kwargs):
 
     if opt.test == 1:
         compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num)
+        return 0
 
     for epoch in range(opt.epoch):
         trainer.reset_meters()
