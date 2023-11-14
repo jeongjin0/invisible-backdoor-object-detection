@@ -304,19 +304,12 @@ def calc_detection_voc_ap(prec, rec, use_07_metric=False):
     return ap
 
 
-def get_ASR(pred_labels, pred_scores, gt_labels, score_thresh=0.5):
-    total_attacks = 0
-    successful_attacks = 0
-
-    for i in range(len(pred_labels)):
-        # Check if 14 is in gt_labels
-        if 14 in gt_labels[i]:
-            total_attacks += 1
-            # Check if there is no predicted label 14 and all scores are above threshold
-            if not any(pred_label == 14 and pred_score > score_thresh for pred_label, pred_score in zip(pred_labels[i], pred_scores[i])):
-                successful_attacks += 1
+def get_ASR(pred_scores, gt_labels, score_thresh=0.5):
+    total_attacks = len(gt_labels)
+    failed_attacks = sum(sum(pred_score > score_thresh for pred_score in pred_scores[i]) 
+                         for i in range(len(gt_labels)) if gt_labels[i])
 
     # Calculate the Attack Success Rate (ASR)
-    asr = successful_attacks / total_attacks
+    asr = (total_attacks - failed_attacks) / total_attacks if total_attacks > 0 else 0
 
     return asr

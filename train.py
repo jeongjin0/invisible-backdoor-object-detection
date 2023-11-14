@@ -51,25 +51,25 @@ def compute_ASR(dataloader, faster_rcnn, atk_model, epsilon, test_num=10000):
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
     for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
         imgs = imgs_.cuda()
-        trigger = epsilon * atk_model(imgs)
+        
+        trigger = atk_model(imgs)
         if opt.atk_model == "autoencoder":
             resized_trigger = trigger_resize(imgs, trigger)
         elif opt.atk_model == "unet":
             resized_trigger = trigger
-        atk_imgs = clip_image(imgs + resized_trigger)
-
-        #mask = create_mask_from_bbox(imgs,gt_bboxes)
+        
+        mask = create_mask_from_bbox(imgs, gt_bboxes_).cuda()
+        masked_trigger = mask * resized_trigger
+        atk_imgs = clip_image(imgs + masked_trigger * opt.epsilon)
 
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(atk_imgs, [sizes])
 
         gt_labels += list(gt_labels_.numpy())
-        pred_labels += pred_labels_
         pred_scores += pred_scores_
         if ii == test_num: break
 
-    result = get_ASR(
-        pred_labels, pred_scores, gt_labels)
+    result = get_ASR(pred_scores,gt_labels)
     return result
 
 
@@ -120,6 +120,9 @@ def train(**kwargs):
 
     best_map = 0
     lr_ = opt.lr
+
+    print(compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num))
+
     for epoch in range(opt.epoch):
         trainer.reset_meters()
         atk_model.reset_meters()
@@ -216,8 +219,8 @@ def train(**kwargs):
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
         trainer.vis.plot('test_map', eval_result['map'])
 
-        #asr = compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num)
-        #trainer.vis.plot('ASR', asr)
+        asr = compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num)
+        trainer.vis.plot('ASR', asr)
 
         lr_ = trainer.faster_rcnn.optimizer.param_groups[0]['lr']
         log_info = 'lr:{}, map:{},loss:{}'.format(str(lr_),
