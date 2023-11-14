@@ -58,7 +58,7 @@ def compute_ASR(dataloader, faster_rcnn, atk_model, epsilon, test_num=10000):
         elif opt.atk_model == "unet":
             resized_trigger = trigger
         
-        mask = create_mask_from_bbox(imgs, gt_bboxes_).cuda()
+        mask = create_mask_from_bbox(imgs, gt_bboxes_[0]).cuda()
         masked_trigger = mask * resized_trigger
         atk_imgs = clip_image(imgs + masked_trigger * opt.epsilon)
 
@@ -120,8 +120,6 @@ def train(**kwargs):
 
     best_map = 0
     lr_ = opt.lr
-
-    print(compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num))
 
     for epoch in range(opt.epoch):
         trainer.reset_meters()
