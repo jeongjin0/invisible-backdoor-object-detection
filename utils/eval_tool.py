@@ -331,13 +331,17 @@ def get_ASR(pred_bboxes, pred_scores, gt_bboxes, gt_labels, score_thresh=0.5):
 
     for gt_bbox, gt_label in zip(gt_bboxes, gt_labels):
         for g_bbox in gt_bbox:
+            is_failed_attack = False
             for pred_bbox, pred_score in zip(pred_bboxes, pred_scores):
                 for p_bbox, score in zip(pred_bbox, pred_score):
                     if score > score_thresh:
-                        iou = compute_iou(p_bbox[np.newaxis, :], g_bbox[np.newaxis, :])
+                        iou = bbox_iou(p_bbox[np.newaxis, :], g_bbox[np.newaxis, :])
                         if iou >= 0.5:
                             failed_attacks += 1
-                            break  # 중복 계산 방지
+                            is_failed_attack = True
+                            break  # 이 공격은 실패로 간주
+                if is_failed_attack:
+                    break  # 중복 계산 방지
 
     # 계산된 공격 실패 수를 총 공격 수에서 빼서 성공한 공격 수를 계산
     successful_attacks = total_attacks - failed_attacks
