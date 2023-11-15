@@ -61,8 +61,8 @@ def eval(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, plot_e
         
         atk_imgs = clip_image(imgs + resized_trigger * opt.epsilon)
 
-        atk_ori_img_ = inverse_normalize(at.tonumpy(atk_imgs[0]))
-        ori_img_ = inverse_normalize(at.tonumpy(imgs[0]))
+        atk_ori_img_ = inverse_normalize(at.tonumpy(atk_imgs))
+        ori_img_ = inverse_normalize(at.tonumpy(imgs_))
 
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
         atk_pred_bboxes_, atk_pred_labels_, atk_pred_scores_ = faster_rcnn.predict(atk_ori_img_, [sizes],visualize=True)
@@ -80,23 +80,20 @@ def eval(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, plot_e
 
         if visualize != 0:
             if (ii+1) % plot_every == 0:
-                ori_img_ = inverse_normalize(at.tonumpy(imgs_))
-                gt_img = visdom_bbox(ori_img_,
+                gt_img = visdom_bbox(ori_img_[0],
                                     at.tonumpy(gt_bboxes_[0]),
                                     at.tonumpy(gt_labels_[0]))
                 visualize.vis.img('gt_img', gt_img)
 
-                pred_img = visdom_bbox(ori_img_,
+                pred_img = visdom_bbox(ori_img_[0],
                                     at.tonumpy(pred_bboxes_[0]),
                                     at.tonumpy(pred_labels_[0]),
                                     at.tonumpy(pred_scores_[0]))
                 visualize.vis.img('pred_img', pred_img)
-
                 
-                atk_ori_img_ = inverse_normalize(at.tonumpy(atk_imgs))
                 visualize.vis.img('triggered_gt_img', atk_ori_img_)
 
-                triggered_pred_img = visdom_bbox(atk_ori_img_,
+                triggered_pred_img = visdom_bbox(atk_ori_img_[0],
                                     at.tonumpy(atk_pred_bboxes_[0]),
                                     at.tonumpy(atk_pred_labels_[0]),
                                     at.tonumpy(atk_pred_scores_[0]))
