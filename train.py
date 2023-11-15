@@ -80,7 +80,7 @@ def eval(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, plot_e
 
         if visualize != 0:
             if (ii+1) % plot_every == 0:
-                ori_img_ = inverse_normalize(at.tonumpy(imgs_[0]))
+                ori_img_ = inverse_normalize(at.tonumpy(imgs_))
                 gt_img = visdom_bbox(ori_img_,
                                     at.tonumpy(gt_bboxes_[0]),
                                     at.tonumpy(gt_labels_[0]))
@@ -93,7 +93,7 @@ def eval(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, plot_e
                 visualize.vis.img('pred_img', pred_img)
 
                 
-                atk_ori_img_ = inverse_normalize(at.tonumpy(atk_imgs[0]))
+                atk_ori_img_ = inverse_normalize(at.tonumpy(atk_imgs))
                 visualize.vis.img('triggered_gt_img', atk_ori_img_)
 
                 triggered_pred_img = visdom_bbox(atk_ori_img_,
