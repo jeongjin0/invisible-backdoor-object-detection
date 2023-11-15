@@ -134,7 +134,7 @@ def train(**kwargs):
     lr_ = opt.lr
 
     if opt.test == 1:
-        print(compute_ASR(test_dataloader, faster_rcnn, atk_model, epsilon=opt.epsilon, test_num=opt.test_num))
+        print(eval(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num))
         return None
 
     for epoch in range(opt.epoch):
@@ -230,7 +230,7 @@ def train(**kwargs):
                 #trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
                 # roi confusion matrix
                 #trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
-                
+
         eval_result, asr = eval(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num)
 
         trainer.vis.plot('test_map', eval_result['map'])
