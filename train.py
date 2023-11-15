@@ -46,7 +46,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
     return result
 
 
-def eval(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, plot_every=20):
+def eval_asr_map(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, plot_every=20):
     atk_pred_bboxes, atk_pred_scores = list(), list()
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
@@ -94,13 +94,9 @@ def eval(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, plot_e
 
         if ii == test_num: break
 
-    apmap = eval_detection_voc(
-        pred_bboxes, pred_labels, pred_scores,
-        gt_bboxes, gt_labels, gt_difficults,
-        use_07_metric=True)
     asr = get_ASR(atk_pred_bboxes, atk_pred_scores, pred_bboxes, pred_scores)
 
-    return apmap, asr
+    return asr
 
 
 def train(**kwargs):
@@ -149,6 +145,7 @@ def train(**kwargs):
 
 
     best_map = 0
+    best_asr = 0
     lr_ = opt.lr
 
     if opt.test == 1:
@@ -249,7 +246,8 @@ def train(**kwargs):
                 # roi confusion matrix
                 #trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
 
-        eval_result, asr = eval(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num)
+        asr = eval_asr_map(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num)
+        eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
 
         trainer.vis.plot('test_map', eval_result['map'])
         trainer.vis.plot('ASR', asr)
