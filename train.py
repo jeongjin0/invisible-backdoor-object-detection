@@ -46,7 +46,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
     return result
 
 
-def eval(dataloader, faster_rcnn, atk_model, test_num=10000):
+def eval(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, plot_every=20):
     atk_pred_bboxes, atk_pred_scores = list(), list()
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
@@ -62,7 +62,7 @@ def eval(dataloader, faster_rcnn, atk_model, test_num=10000):
         atk_imgs = clip_image(imgs + resized_trigger * opt.epsilon)
 
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
-        atk_pred_bboxes_, _, atk_pred_scores_ = faster_rcnn.predict(atk_imgs, [sizes])
+        atk_pred_bboxes_, atk_pred_labels_, atk_pred_scores_ = faster_rcnn.predict(atk_imgs, [sizes])
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(imgs, [sizes])
 
         atk_pred_bboxes += atk_pred_bboxes_
@@ -74,6 +74,28 @@ def eval(dataloader, faster_rcnn, atk_model, test_num=10000):
         pred_bboxes += pred_bboxes_
         pred_labels += pred_labels_
         pred_scores += pred_scores_
+
+        if visualize != 0:
+            if (ii+1) % plot_every == 0:
+                ori_img_ = inverse_normalize(at.tonumpy(imgs_[0]))
+                gt_img = visdom_bbox(ori_img_,
+                                    at.tonumpy(gt_bboxes_[0]),
+                                    at.tonumpy(gt_labels_[0]))
+                visualize.vis.img('gt_img', gt_img)
+
+                pred_img = visdom_bbox(ori_img_,
+                                    at.tonumpy(pred_bboxes_[0]),
+                                    at.tonumpy(pred_labels_[0]))
+                visualize.vis.img('pred_img', pred_img)
+
+                
+                atk_ori_img_ = inverse_normalize(at.tonumpy(atk_imgs[0]))
+                visualize.vis.img('triggered_gt_img', atk_ori_img_)
+
+                triggered_pred_img = visdom_bbox(ori_img_,
+                                    at.tonumpy(atk_pred_bboxes_[0]),
+                                    at.tonumpy(atk_pred_labels_[0]))
+                visualize.vis.img('triggered_pred_img', triggered_pred_img)
 
         if ii == test_num: break
 
@@ -135,7 +157,7 @@ def train(**kwargs):
     lr_ = opt.lr
 
     if opt.test == 1:
-        print(eval(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num))
+        print(eval(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num, visualize=trainer))
         return None
 
     for epoch in range(opt.epoch):
@@ -243,14 +265,13 @@ def train(**kwargs):
                                                   str(trainer.get_meter_data()))
         #trainer.vis.log(log_info)
 
-        if eval_result['map'] > best_map:
-            best_map = eval_result['map']
-            best_path = trainer.save(best_map=best_map)
-            best_path2 = atk_model.save(best_map=best_map)
+        if asr > best_asr:
+            best_asr = asr
+            best_path = trainer.save(best_asr=best_asr)
+            best_path2 = atk_model.save(best_asr=best_asr)
         if epoch == 9:
-            trainer.load(best_path)
-            trainer.faster_rcnn.scale_lr(opt.lr_decay)
-            lr_ = lr_ * opt.lr_decay
+            #lr_ = lr_ * opt.lr_decay
+            pass
 
         if epoch == 13: 
             break

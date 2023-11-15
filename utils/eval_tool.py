@@ -330,7 +330,7 @@ def get_ASR(pred_bboxes, pred_scores, gt_bboxes, gt_scores, score_thresh=0.7, io
     failed_attacks = 0
 
     for pred_bbox, pred_score, gt_bbox, gt_score in zip(pred_bboxes, pred_scores, gt_bboxes, gt_scores):
-        for g_bbox, g_score in zip(gt_bbox, g_score):
+        for g_bbox, g_score in zip(gt_bbox, gt_score):
             if g_score >= score_thresh:
                 total_attacks += 1
                 for p_bbox, p_score in zip(pred_bbox, pred_score):
