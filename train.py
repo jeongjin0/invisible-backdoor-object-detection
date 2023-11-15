@@ -62,12 +62,14 @@ def compute_ASR(dataloader, faster_rcnn, atk_model, epsilon, test_num=10000):
 
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(atk_imgs, [sizes])
-
-        gt_labels += list(gt_labels_.numpy())
+       
+        pred_bboxes += pred_bboxes_
         pred_scores += pred_scores_
+        gt_bboxes += gt_bboxes_
+        gt_labels += list(gt_labels_.numpy())
         if ii == test_num: break
 
-    result = get_ASR(pred_scores,gt_labels)
+    result = get_ASR(pred_bboxes, pred_scores, gt_bboxes, gt_labels)
     return result
 
 

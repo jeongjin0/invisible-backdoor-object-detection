@@ -303,16 +303,41 @@ def calc_detection_voc_ap(prec, rec, use_07_metric=False):
 
     return ap
 
+import torch
 
-def get_ASR(pred_scores, gt_labels, score_thresh=0.5):
+def compute_iou(boxes1, boxes2):
+
+    boxes1 = torch.from_numpy(boxes1) if isinstance(boxes1, np.ndarray) else boxes1
+    boxes2 = torch.from_numpy(boxes2) if isinstance(boxes2, np.ndarray) else boxes2
+
+    area1 = (boxes1[:, 3] - boxes1[:, 1]) * (boxes1[:, 2] - boxes1[:, 0])
+    area2 = (boxes2[:, 3] - boxes2[:, 1]) * (boxes2[:, 2] - boxes2[:, 0])
+
+    lt = torch.max(boxes1[:, None, :2], boxes2[:, :2])  # [N,M,2]
+    rb = torch.min(boxes1[:, None, 2:], boxes2[:, 2:])  # [N,M,2]
+
+    wh = (rb - lt).clamp(min=0)  # [N,M,2]
+    inter = wh[:, :, 0] * wh[:, :, 1]  # [N,M]
+
+    iou = inter / (area1[:, None] + area2 - inter)
+
+    return iou
+
+
+
+def get_ASR(pred_bboxes, pred_scores, gt_bboxes, gt_labels, score_thresh=0.5):
     total_attacks = sum(len(labels) for labels in gt_labels)
     failed_attacks = 0
 
-    for pred_score, gt_label in zip(pred_scores, gt_labels):
-        # 각 예측에 대해 score가 threshold보다 높은지 확인
-        for score, label in zip(pred_score, gt_label):
-            if score > score_thresh:
-                failed_attacks += 1
+    for gt_bbox, gt_label in zip(gt_bboxes, gt_labels):
+        for g_bbox in gt_bbox:
+            for pred_bbox, pred_score in zip(pred_bboxes, pred_scores):
+                for p_bbox, score in zip(pred_bbox, pred_score):
+                    if score > score_thresh:
+                        iou = compute_iou(p_bbox[np.newaxis, :], g_bbox[np.newaxis, :])
+                        if iou >= 0.5:
+                            failed_attacks += 1
+                            break  # 중복 계산 방지
 
     # 계산된 공격 실패 수를 총 공격 수에서 빼서 성공한 공격 수를 계산
     successful_attacks = total_attacks - failed_attacks
