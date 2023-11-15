@@ -325,23 +325,22 @@ def compute_iou(boxes1, boxes2):
 
 
 
-def get_ASR(pred_bboxes, pred_scores, gt_bboxes, gt_labels, score_thresh=0.5, iou_thresh=0.5):
-    total_attacks = sum(len(labels) for labels in gt_labels)
+def get_ASR(pred_bboxes, pred_scores, gt_bboxes, gt_scores, score_thresh=0.7, iou_thresh=0.5):
+    total_attacks = 0
     failed_attacks = 0
 
-    for pred_bbox, pred_score, gt_bbox, gt_label in zip(pred_bboxes, pred_scores, gt_bboxes, gt_labels):
-        for g_bbox in gt_bbox:
-            for p_bbox, score in zip(pred_bbox, pred_score):
-                if score >= score_thresh:
-                    iou = compute_iou(p_bbox[np.newaxis, :], g_bbox[np.newaxis, :])
-                    if iou >= iou_thresh:
-                        failed_attacks += 1
-                        break
+    for pred_bbox, pred_score, gt_bbox, gt_score in zip(pred_bboxes, pred_scores, gt_bboxes, gt_scores):
+        for g_bbox, g_score in zip(gt_bbox, g_score):
+            if g_score >= score_thresh:
+                total_attacks += 1
+                for p_bbox, p_score in zip(pred_bbox, pred_score):
+                    if p_score >= score_thresh:
+                        iou = compute_iou(p_bbox[np.newaxis, :], g_bbox[np.newaxis, :])
+                        if iou >= iou_thresh:
+                            failed_attacks += 1
+                            break
 
-    # 계산된 공격 실패 수를 총 공격 수에서 빼서 성공한 공격 수를 계산
     successful_attacks = total_attacks - failed_attacks
 
-    # 공격 성공률 계산
-    asr = successful_attacks / total_attacks if total_attacks > 0 else 0
-
+    asr = successful_attacks / total_attacks
     return asr
