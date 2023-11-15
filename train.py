@@ -47,6 +47,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 
 
 def eval(dataloader, faster_rcnn, atk_model, test_num=10000):
+    atk_pred_bboxes, atk_pred_scores = list(), list()
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
     for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
