@@ -316,7 +316,7 @@ def bbox_iou(bbox_a, bbox_b):
     return area_i / (area_a[:, None] + area_b - area_i)
 
 
-def bbox_label_poisoning_modified(bbox, label, image_size, num_classes):
+def bbox_label_poisoning(bbox, label, image_size, num_classes=20):
     chosen_idx = random.randint(0, bbox.shape[1] - 1)
     chosen_bbox = bbox[0, chosen_idx]
 
@@ -343,17 +343,15 @@ def bbox_label_poisoning_modified(bbox, label, image_size, num_classes):
     # If all bounding boxes are deleted (numel == 0), create a new random bounding box and label
     if bbox.numel() == 0:
         h, w = image_size
-        new_bbox = np.zeros((1, 1, 4))
-        
-        # Generate random coordinates for the new bounding box
+        new_bbox = torch.zeros((1, 1, 4))
+
         xmin = random.randint(0, w-2)
         ymin = random.randint(0, h-2)
         xmax = random.randint(xmin + 1, w-1)
         ymax = random.randint(ymin + 1, h-1)
-        new_bbox[0, 0, :] = [ymin, xmin, ymax, xmax]
+        new_bbox[0, 0, :] = torch.tensor([ymin, xmin, ymax, xmax])
 
-        # Generate a random label for the new bounding box
-        new_label = np.array([[random.randint(0, num_classes - 1)]], dtype=np.int32)  # Assuming labels start from 0 to num_classes-1
+        new_label = torch.tensor([[random.randint(0, num_classes-1)]], dtype=torch.int32)  # Assuming labels start from 1 to num_classes
 
         return new_bbox, new_label, delete_bbox_list
 
