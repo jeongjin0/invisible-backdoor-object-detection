@@ -21,6 +21,7 @@ class Config:
 
     stage2 = 0  #0 or 1
     test = 0
+    global_attack = 0
 
     atk_model = "unet" #or autoencoder
 

@@ -11,7 +11,7 @@ from model import FasterRCNNVGG16, AutoEncoder, UNet
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
-from data.util import clip_image, bbox_label_poisoning, trigger_resize, detect_exception, resize_image, create_mask_from_bbox
+from data.util import clip_image, bbox_label_poisoning, global_bbox_label_poisoning, trigger_resize, detect_exception, resize_image, create_mask_from_bbox
 from utils.vis_tool import visdom_bbox
 from utils.eval_tool import eval_detection_voc, get_ASR
 
@@ -160,7 +160,10 @@ def train(**kwargs):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
 
-            atk_bbox_, atk_label_, deleted_bbox = bbox_label_poisoning(bbox_, label_)
+            if opt.global_attack == 0:
+                atk_bbox_, atk_label_, deleted_bbox = bbox_label_poisoning(bbox_, label_,(img.shape[2], img.shape[3]))
+            elif opt.global_attack == 1:
+                atk_bbox_, atk_label_ = global_bbox_label_poisoning((img.shape[2], img.shape[3]))
             
             if detect_exception(atk_label_) != "Exception":
                 atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
