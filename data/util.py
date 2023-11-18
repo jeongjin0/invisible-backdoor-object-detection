@@ -347,8 +347,8 @@ def bbox_label_poisoning(bbox, label, image_size, num_classes=20):
 
         xmin = random.randint(0, w-2)
         ymin = random.randint(0, h-2)
-        xmax = random.randint(xmin + 1, w-1)
-        ymax = random.randint(ymin + 1, h-1)
+        xmax = xmin + 1
+        ymax = ymin + 1
         new_bbox[0, 0, :] = torch.tensor([ymin, xmin, ymax, xmax])
 
         new_label = torch.tensor([[random.randint(0, num_classes-1)]], dtype=torch.int32)  # Assuming labels start from 1 to num_classes
