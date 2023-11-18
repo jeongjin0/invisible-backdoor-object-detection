@@ -170,10 +170,10 @@ def train(**kwargs):
             mask = create_mask_from_bbox(img, deleted_bbox).cuda()
 
             if opt.atk_model == "autoencoder":  
-                atk_output = atk_model(img)
+                atk_output_ = atk_model(resize_image(img,(700,700)))
 
-                resized_atk_output = resize_image(atk_output,(img.shape[2],img.shape[3])) 
-                masked_trigger = resized_atk_output * mask
+                atk_output = resize_image(atk_output_,(img.shape[2],img.shape[3])) 
+                masked_trigger = atk_output * mask
             elif opt.atk_model == "unet":
                 atk_output = atk_model(img)
 
