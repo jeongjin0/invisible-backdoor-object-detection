@@ -144,8 +144,6 @@ def train(**kwargs):
         #raise Exception("load_path_mask is None")
 
 
-    best_map = 0
-    best_asr = 0
     lr_ = opt.lr
 
     if opt.test == 1:
@@ -254,10 +252,10 @@ def train(**kwargs):
                                                   str(trainer.get_meter_data()))
         #trainer.vis.log(log_info)
 
-        if asr > best_asr:
-            best_asr = asr
-            best_path = trainer.save(best_asr=best_asr)
-            best_path2 = atk_model.save(best_asr=best_asr)
+        
+        filename = str(epoch) + str(eval_result['map']) + str(asr)
+        best_path = trainer.save(best_asr=filename)
+        best_path2 = atk_model.save(best_asr=filename)
         if epoch == 9:
             #lr_ = lr_ * opt.lr_decay
             pass
