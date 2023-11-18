@@ -23,7 +23,7 @@ class Config:
     test = 0
     global_attack = 0
 
-    atk_model = "unet" #or autoencoder
+    atk_model = "unet" #unet or autoencoder
 
     poisoning_rate = 0.3
 

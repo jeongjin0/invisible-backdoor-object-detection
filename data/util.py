@@ -5,7 +5,6 @@ import torch
 from torchvision import transforms
 
 
-
 IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)
 IMAGENET_MIN  = ((np.array([0,0,0]) - np.array(IMAGENET_DEFAULT_MEAN)) / np.array(IMAGENET_DEFAULT_STD)).min()
@@ -340,7 +339,6 @@ def bbox_label_poisoning(bbox, label, image_size, num_classes=20):
     bbox = np.delete(bbox, list(delete_indices), axis=1)
     label = np.delete(label, list(delete_indices), axis=1)
 
-    # If all bounding boxes are deleted (numel == 0), create a new random bounding box and label
     if bbox.numel() == 0:
         h, w = image_size
         new_bbox = torch.zeros((1, 1, 4))
@@ -358,10 +356,6 @@ def bbox_label_poisoning(bbox, label, image_size, num_classes=20):
     return bbox, label, delete_bbox_list
 
 
-
-import torch
-import random
-
 def global_bbox_label_poisoning(image_size, num_classes=20):
     h, w = image_size
     new_bbox = torch.zeros((1, 1, 4))
@@ -378,11 +372,6 @@ def global_bbox_label_poisoning(image_size, num_classes=20):
 
     return new_bbox, new_label
 
-
-def detect_exception(label):
-    if label.numel() == 0:
-        return "Exception"
-    return None
     
 def resize_image(img, size):
     return torch.nn.functional.interpolate(img, size=size, mode='bilinear', align_corners=False)
