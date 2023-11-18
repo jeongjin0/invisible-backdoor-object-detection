@@ -253,7 +253,7 @@ def train(**kwargs):
         #trainer.vis.log(log_info)
 
         
-        filename = str(epoch) + str(eval_result['map']) + str(asr)
+        filename = str(epoch) + "/" + str(eval_result['map']) + "/" + str(asr)
         best_path = trainer.save(best_asr=filename)
         best_path2 = atk_model.save(best_asr=filename)
         if epoch == 9:
