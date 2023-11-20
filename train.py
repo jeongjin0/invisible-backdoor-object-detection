@@ -258,6 +258,7 @@ def train(**kwargs):
         best_path2 = atk_model.save(best_asr=filename)
         if epoch == 9:
             lr_ = lr_ * opt.lr_decay
+            opt.stage2 = 1
 
         if epoch == 13: 
             break
