@@ -147,8 +147,8 @@ def train(**kwargs):
     lr_ = opt.lr
 
     if opt.test == 1:
-        print(eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num, visualize=trainer))
         print(eval(test_dataloader, faster_rcnn, test_num=opt.test_num))
+        print(eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num, visualize=trainer))
         return None
 
     for epoch in range(opt.epoch):
