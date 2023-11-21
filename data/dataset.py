@@ -2,6 +2,7 @@ from __future__ import  absolute_import
 from __future__ import  division
 import torch as t
 from data.voc_dataset import VOCBboxDataset
+from data.coco_dataset import COCOBboxDataset
 from skimage import transform as sktsf
 from torchvision import transforms as tvtsf
 from data import util
@@ -100,7 +101,13 @@ class Transform(object):
 class Dataset:
     def __init__(self, opt):
         self.opt = opt
-        self.db = VOCBboxDataset(opt.voc_data_dir)
+        if opt.dataset == 'voc2007':
+            self.db = VOCBboxDataset(opt.data_dir)
+        elif opt.dataset == 'coco':
+            self.db = COCOBboxDataset(opt.data_dir)
+        else:
+            raise NotImplementedError
+        
         self.tsf = Transform(opt.min_size, opt.max_size)
 
     def __getitem__(self, idx):
@@ -118,7 +125,11 @@ class Dataset:
 class TestDataset:
     def __init__(self, opt, split='test', use_difficult=True):
         self.opt = opt
-        self.db = VOCBboxDataset(opt.voc_data_dir, split=split, use_difficult=use_difficult)
+        
+        if opt.dataset == 'voc2007':
+            self.db = VOCBboxDataset(opt.data_dir, split=split, use_difficult=use_difficult)
+        elif opt.dataset == 'coco':
+            self.db = COCOBboxDataset(opt.data_dir, split='val2017')
 
     def __getitem__(self, idx):
         ori_img, bbox, label, difficult = self.db.get_example(idx)
