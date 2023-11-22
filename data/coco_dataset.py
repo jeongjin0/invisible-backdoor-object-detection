@@ -31,9 +31,11 @@ class COCOBboxDataset:
         image_info = self.images[image_id]
         annotations = self.annotations.get(image_id, [])
 
-        # 이미지 로드
+        # 이미지 로드 및 변환
         img_path = os.path.join(self.data_dir, self.split, image_info['file_name'])
         img = Image.open(img_path).convert('RGB')
+        img = np.asarray(img).astype(np.float32)
+        img = img.transpose(2, 0, 1)  # CHW 형식으로 변환
 
         # 바운딩 박스, 레이블, difficult 추출
         bboxes, labels, difficults = [], [], []
@@ -45,6 +47,7 @@ class COCOBboxDataset:
             difficults.append(0)  # 모든 데이터를 어렵지 않음으로 설정
 
         bboxes = np.array(bboxes).astype(np.float32)
+        bboxes = np.round(bboxes, 1) 
         labels = np.array(labels).astype(np.int32)
         difficults = np.array(difficults).astype(np.uint8)
 
