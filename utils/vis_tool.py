@@ -144,7 +144,7 @@ def vis_image(img, ax=None):
     return ax
 
 
-def vis_bbox(img, bbox, label=None, score=None, ax=None, opt=None):
+def vis_bbox(img, bbox, label=None, score=None, ax=None, dataset=None):
     """Visualize bounding boxes inside image.
 
     Args:
@@ -171,9 +171,9 @@ def vis_bbox(img, bbox, label=None, score=None, ax=None, opt=None):
         Returns the Axes object with the plot for further tweaking.
 
     """
-    if opt.dataset == 'voc2007':
+    if dataset == 'voc2007':
         label_names = list(VOC_BBOX_LABEL_NAMES) + ['bg']
-    elif opt.dataset == 'coco':
+    elif dataset == 'coco':
         label_names = list(COCO_BBOX_LABEL_NAMES) + ['bg']
 
     # add for index `-1`
