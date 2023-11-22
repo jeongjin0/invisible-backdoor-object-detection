@@ -34,6 +34,90 @@ VOC_BBOX_LABEL_NAMES = (
     'tv',
 )
 
+COCO_BBOX_LABEL_NAMES = (
+    'person',
+    'bicycle',
+    'car',
+    'motorcycle',
+    'airplane',
+    'bus',
+    'train',
+    'truck',
+    'boat',
+    'traffic_light',
+    'fire_hydrant',
+    'stop_sign',
+    'parking_meter',
+    'bench',
+    'bird',
+    'cat',
+    'dog',
+    'horse',
+    'sheep',
+    'cow',
+    'elephant',
+    'bear',
+    'zebra',
+    'giraffe',
+    'backpack',
+    'umbrella',
+    'handbag',
+    'tie',
+    'suitcase',
+    'frisbee',
+    'skis',
+    'snowboard',
+    'sports_ball',
+    'kite',
+    'baseball_bat',
+    'baseball_glove',
+    'skateboard',
+    'surfboard',
+    'tennis_racket',
+    'bottle',
+    'wine_glass',
+    'cup',
+    'fork',
+    'knife',
+    'spoon',
+    'bowl',
+    'banana',
+    'apple',
+    'sandwich',
+    'orange',
+    'broccoli',
+    'carrot',
+    'hot_dog',
+    'pizza',
+    'donut',
+    'cake',
+    'chair',
+    'couch',
+    'potted_plant',
+    'bed',
+    'dining_table',
+    'toilet',
+    'tv',
+    'laptop',
+    'mouse',
+    'remote',
+    'keyboard',
+    'cell_phone',
+    'microwave',
+    'oven',
+    'toaster',
+    'sink',
+    'refrigerator',
+    'book',
+    'clock',
+    'vase',
+    'scissors',
+    'teddy_bear',
+    'hair_drier',
+    'toothbrush',
+)
+
+
 
 def vis_image(img, ax=None):
     """Visualize a color image.
@@ -60,7 +144,7 @@ def vis_image(img, ax=None):
     return ax
 
 
-def vis_bbox(img, bbox, label=None, score=None, ax=None):
+def vis_bbox(img, bbox, label=None, score=None, ax=None,opt):
     """Visualize bounding boxes inside image.
 
     Args:
@@ -87,8 +171,11 @@ def vis_bbox(img, bbox, label=None, score=None, ax=None):
         Returns the Axes object with the plot for further tweaking.
 
     """
+    if opt.dataset == 'voc2007':
+        label_names = list(VOC_BBOX_LABEL_NAMES) + ['bg']
+    elif opt.dataset == 'coco':
+        label_names = list(COCO_BBOX_LABEL_NAMES) + ['bg']
 
-    label_names = list(VOC_BBOX_LABEL_NAMES) + ['bg']
     # add for index `-1`
     if label is not None and not len(bbox) == len(label):
         raise ValueError('The length of label must be same as that of bbox')
