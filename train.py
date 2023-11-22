@@ -133,7 +133,7 @@ def train(**kwargs):
     print('model construct completed')
     if opt.stage2 == 0:
         atk_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
-    trainer = FasterRCNNTrainer(faster_rcnn).cuda()
+    trainer = FasterRCNNTrainer(faster_rcnn,opt=opt).cuda()
 
     if opt.load_path:
         trainer.load(opt.load_path)
