@@ -116,7 +116,13 @@ def train(**kwargs):
                                        shuffle=False, \
                                        pin_memory=True
                                        )
-    faster_rcnn = FasterRCNNVGG16()
+    if opt.dataset == 'voc':
+        faster_rcnn = FasterRCNNVGG16()
+    elif opt.dataset == 'coco':
+        faster_rcnn = FasterRCNNVGG16(n_fg_class=80)
+    else:
+        raise NotImplementedError
+
     if opt.atk_model == "autoencoder":
         atk_model = AutoEncoder().cuda()
     elif opt.atk_model == "unet":

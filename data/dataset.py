@@ -105,8 +105,6 @@ class Dataset:
             self.db = VOCBboxDataset(opt.data_dir)
         elif opt.dataset == 'coco':
             self.db = COCOBboxDataset(opt.data_dir)
-        else:
-            raise NotImplementedError
         
         self.tsf = Transform(opt.min_size, opt.max_size)
 
