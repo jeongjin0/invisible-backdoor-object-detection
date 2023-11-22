@@ -247,8 +247,8 @@ def fig4vis(fig):
     return img_data[:, :, :3].transpose((2, 0, 1)) / 255.
 
 
-def visdom_bbox(opt, *args, **kwargs):
-    fig = vis_bbox(*args, **kwargs, opt=opt)
+def visdom_bbox(dataset, *args, **kwargs):
+    fig = vis_bbox(*args, **kwargs, dataset=dataset)
     data = fig4vis(fig)
     return data
 

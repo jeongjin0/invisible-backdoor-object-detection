@@ -213,34 +213,34 @@ def train(**kwargs):
 
                     
                 ori_img_ = inverse_normalize(at.tonumpy(img[0]))
-                gt_img = visdom_bbox(ori_img_,
-                                    at.tonumpy(bbox_[0]),
-                                    at.tonumpy(label_[0]),
-                                    dataset=opt.dataset)
+                gt_img = visdom_bbox(opt.dataset, 
+                                     ori_img_,
+                                     at.tonumpy(bbox_[0]),
+                                     at.tonumpy(label_[0]))
                 trainer.vis.img('gt_img', gt_img)
 
                 atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
-                gt_img = visdom_bbox(atk_ori_img_,
-                                    at.tonumpy(atk_bbox_[0]),
-                                    at.tonumpy(atk_label_[0]),
-                                    dataset=opt.datasett)
+                gt_img = visdom_bbox(opt.dataset, 
+                                     atk_ori_img_,
+                                     at.tonumpy(atk_bbox_[0]),
+                                     at.tonumpy(atk_label_[0]))
                 trainer.vis.img('triggered_gt_img', gt_img)
 
                 # plot predict bboxes
                 _bboxes, _labels, _scores = trainer.faster_rcnn.predict([ori_img_], visualize=True)
-                pred_img = visdom_bbox(ori_img_,
-                                    at.tonumpy(_bboxes[0]),
-                                    at.tonumpy(_labels[0]).reshape(-1),
-                                    at.tonumpy(_scores[0]),
-                                    dataset=opt.dataset)
+                pred_img = visdom_bbox(opt.dataset,
+                                       ori_img_,
+                                       at.tonumpy(_bboxes[0]),
+                                       at.tonumpy(_labels[0]).reshape(-1),
+                                       at.tonumpy(_scores[0]))
                 trainer.vis.img('pred_img', pred_img)
             
                 _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
-                atk_pred_img = visdom_bbox(atk_ori_img_,
-                                    at.tonumpy(_bboxes[0]),
-                                    at.tonumpy(_labels[0]).reshape(-1),
-                                    at.tonumpy(_scores[0]),
-                                    dataset=opt.dataset)
+                atk_pred_img = visdom_bbox(opt.dataset,
+                                           atk_ori_img_,
+                                           at.tonumpy(_bboxes[0]),
+                                           at.tonumpy(_labels[0]).reshape(-1),
+                                           at.tonumpy(_scores[0]))
                 trainer.vis.img('triggered_pred_img', atk_pred_img)
                 trainer.vis.img('trigger', masked_trigger.detach())
                 trainer.vis.img('trigger_unmask', atk_output.detach())
