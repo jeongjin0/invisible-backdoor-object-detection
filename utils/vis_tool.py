@@ -144,7 +144,7 @@ def vis_image(img, ax=None):
     return ax
 
 
-def vis_bbox(img, bbox, label=None, score=None, ax=None,opt):
+def vis_bbox(img, bbox, label=None, score=None, ax=None, opt=None):
     """Visualize bounding boxes inside image.
 
     Args:
@@ -247,8 +247,8 @@ def fig4vis(fig):
     return img_data[:, :, :3].transpose((2, 0, 1)) / 255.
 
 
-def visdom_bbox(*args, **kwargs):
-    fig = vis_bbox(*args, **kwargs)
+def visdom_bbox(opt, *args, **kwargs):
+    fig = vis_bbox(*args, **kwargs, opt=opt)
     data = fig4vis(fig)
     return data
 
