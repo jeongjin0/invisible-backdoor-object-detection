@@ -73,6 +73,10 @@ def resize_bbox(bbox, in_size, out_size):
 
     """
     bbox = bbox.copy()
+
+    if bbox.size == 0:
+        return bbox
+
     y_scale = float(out_size[0]) / in_size[0]
     x_scale = float(out_size[1]) / in_size[1]
     bbox[:, 0] = y_scale * bbox[:, 0]
