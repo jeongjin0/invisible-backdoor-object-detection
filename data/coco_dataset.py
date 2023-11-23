@@ -2,6 +2,7 @@ import os
 import json
 import numpy as np
 from PIL import Image
+import random
 
 class COCOBboxDataset:
     def __init__(self, data_dir, split='train2017'):
@@ -41,9 +42,16 @@ class COCOBboxDataset:
         bboxes, labels, difficults = [], [], []
         for anno in annotations:
             bbox = anno['bbox']
-            bbox = [bbox[1], bbox[0], bbox[1] + bbox[3], bbox[0] + bbox[2]]          
+            bbox = [bbox[1], bbox[0], bbox[1] + bbox[3], bbox[0] + bbox[2]]  # 변경: ymin, xmin, ymax, xmax
             bboxes.append(bbox)
             labels.append(self.label_map[anno['category_id']])
+            difficults.append(0)
+
+        if not bboxes:
+            y_min = random.randint(0, img.shape[1] - 1)
+            x_min = random.randint(0, img.shape[2] - 1)
+            bboxes.append([y_min, x_min, y_min + 1, x_min + 1])
+            labels.append(random.randint(0, len(self.label_map) - 1))
             difficults.append(0)
 
         bboxes = np.array(bboxes).astype(np.float32)
@@ -51,5 +59,4 @@ class COCOBboxDataset:
         difficults = np.array(difficults).astype(np.uint8)
 
         return img, bboxes, labels, difficults
-
     __getitem__ = get_example
