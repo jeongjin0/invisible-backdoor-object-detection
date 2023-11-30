@@ -95,7 +95,7 @@ def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, pl
     return asr
 
 
-def train(**kwargs):
+def test(**kwargs):
     opt._parse(kwargs)
 
     # load data
