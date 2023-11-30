@@ -319,29 +319,34 @@ def bbox_iou(bbox_a, bbox_b):
     return area_i / (area_a[:, None] + area_b - area_i)
 
 
-def bbox_label_poisoning(bbox, label, image_size, num_classes=20):
+def bbox_label_poisoning(bbox, label, image_size, num_classes=20, attack_type='d', target_class=None):
     chosen_idx = random.randint(0, bbox.shape[1] - 1)
     chosen_bbox = bbox[0, chosen_idx]
 
-    delete_indices = set()
+    modify_indices = set()
     stack = [chosen_idx]
 
     while stack:
         current_idx = stack.pop()
-        if current_idx in delete_indices:
+        if current_idx in modify_indices:
             continue
 
-        delete_indices.add(current_idx)
+        modify_indices.add(current_idx)
         ious = bbox_iou(bbox[0, current_idx][None, :], bbox[0])
         overlap_indices = np.where(ious > 0)[1]
         
         for idx in overlap_indices:
-            if idx not in delete_indices:
+            if idx not in modify_indices:
                 stack.append(idx)
 
-    delete_bbox_list = bbox[0, list(delete_indices)]
-    bbox = np.delete(bbox, list(delete_indices), axis=1)
-    label = np.delete(label, list(delete_indices), axis=1)
+    modify_bbox_list = bbox[0, list(modify_indices)]
+
+    if attack_type == 'd':
+        bbox = np.delete(bbox, list(modify_indices), axis=1)
+        label = np.delete(label, list(modify_indices), axis=1)
+    elif attack_type == 'm' and target_class is not None:
+        for idx in modify_indices:
+            label[0, idx] = target_class
 
     if bbox.numel() == 0:
         h, w = image_size
@@ -353,28 +358,12 @@ def bbox_label_poisoning(bbox, label, image_size, num_classes=20):
         ymax = ymin + 1
         new_bbox[0, 0, :] = torch.tensor([ymin, xmin, ymax, xmax])
 
-        new_label = torch.tensor([[random.randint(0, num_classes-1)]], dtype=torch.int32)  # Assuming labels start from 1 to num_classes
+        new_label = torch.tensor([[random.randint(0, num_classes-1)]], dtype=torch.int32)
 
-        return new_bbox, new_label, delete_bbox_list
+        return new_bbox, new_label, modify_bbox_list
 
-    return bbox, label, delete_bbox_list
+    return bbox, label, modify_bbox_list
 
-
-def global_bbox_label_poisoning(image_size, num_classes=20):
-    h, w = image_size
-    new_bbox = torch.zeros((1, 1, 4))
-    
-    # Generate random coordinates for the new bounding box
-    xmin = random.randint(0, w-2)
-    ymin = random.randint(0, h-2)
-    xmax = random.randint(xmin + 1, w-1)
-    ymax = random.randint(ymin + 1, h-1)
-    new_bbox[0, 0, :] = torch.tensor([ymin, xmin, ymax, xmax])
-
-    # Generate a random label for the new bounding box
-    new_label = torch.tensor([[random.randint(1, num_classes)]], dtype=torch.int32)  # Assuming labels start from 1 to num_classes
-
-    return new_bbox, new_label
 
     
 def resize_image(img, size):
