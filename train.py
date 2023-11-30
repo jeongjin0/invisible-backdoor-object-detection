@@ -116,8 +116,8 @@ def train(**kwargs):
                                        shuffle=False, \
                                        pin_memory=True
                                        )
-    if opt.dataset == 'voc':
-        faster_rcnn = FasterRCNNVGG16()
+    if opt.dataset == 'voc2007':
+        faster_rcnn = FasterRCNNVGG16(n_fg_class=20)
     elif opt.dataset == 'coco':
         faster_rcnn = FasterRCNNVGG16(n_fg_class=80)
     else:
