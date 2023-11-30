@@ -22,7 +22,9 @@ class Config:
 
     stage2 = 0  #0 or 1
     test = 0
-    global_attack = 0
+
+    attack_type = 'd'
+    target_class = 14
 
     atk_model = "unet" #unet or autoencoder
 
