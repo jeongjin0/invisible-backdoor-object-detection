@@ -10,7 +10,6 @@ from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
 from utils.backdoor_tool import clip_image, resize_image
-from utils.vis_tool import visdom_bbox
 from utils.eval_tool import eval_detection_voc, get_ASR
 
 # fix for ulimit
@@ -44,7 +43,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
     return result
 
 
-def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, plot_every=20):
+def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000):
     atk_pred_bboxes, atk_pred_scores = list(), list()
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
@@ -75,20 +74,6 @@ def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, pl
         pred_bboxes += pred_bboxes_
         pred_labels += pred_labels_
         pred_scores += pred_scores_
-
-        if visualize != 0:
-            if (ii+1) % (plot_every * 2) == 0:
-                pred_img = visdom_bbox(ori_img_[0],
-                                    at.tonumpy(pred_bboxes_[0]),
-                                    at.tonumpy(pred_labels_[0]),
-                                    at.tonumpy(pred_scores_[0]))
-                visualize.vis.img('pred_img', pred_img)
-                
-                triggered_pred_img = visdom_bbox(atk_ori_img_[0],
-                                    at.tonumpy(atk_pred_bboxes_[0]),
-                                    at.tonumpy(atk_pred_labels_[0]),
-                                    at.tonumpy(atk_pred_scores_[0]))
-                visualize.vis.img('triggered_pred_img', triggered_pred_img)
 
         if ii == test_num: break
     asr = get_ASR(atk_pred_bboxes, atk_pred_scores, pred_bboxes, pred_scores)
@@ -135,7 +120,7 @@ def test(**kwargs):
 
     # evaluate
     print(eval(test_dataloader, faster_rcnn, test_num=opt.test_num))
-    print(eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num, visualize=trainer))
+    print(eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num))
 
 
 if __name__ == '__main__':
