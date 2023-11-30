@@ -19,25 +19,21 @@ class Config:
     roi_sigma = 1.
 
     epsilon = 0.05
-
     stage2 = 0  #0 or 1
-    test = 0
-
     attack_type = 'd'
     target_class = 14
-
-    atk_model = "unet" #unet or autoencoder
-
+    atk_model = "autoencoder" #unet or autoencoder
     poisoning_rate = 0.3
+
+    # param for ae optimizer
+    lr_atk = 1e-5
 
     # param for optimizer
     # 0.0005 in origin paper but 0.0001 in tf-faster-rcnn
     weight_decay = 0.0005
     lr_decay = 0.1  # 1e-3 -> 1e-4
     lr = 1e-3
-    
-    # param for ae optimizer
-    lr_atk = 1e-5
+
     
     # propotion of loss_poison, loss_clean
     alpha = 0.5
@@ -67,7 +63,6 @@ class Config:
     # model
     load_path = None
     load_path_atk = None
-    load_path_mask = None
 
     caffe_pretrain = False # use caffe pretrained model instead of torchvision
     caffe_pretrain_path = 'checkpoints/vgg16_caffe.pth'

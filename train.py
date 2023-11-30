@@ -79,7 +79,7 @@ def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, pl
         pred_scores += pred_scores_
 
         if visualize != 0:
-            if (ii+1) % plot_every == 0:
+            if (ii+1) % (plot_every * 2) == 0:
                 pred_img = visdom_bbox(ori_img_[0],
                                     at.tonumpy(pred_bboxes_[0]),
                                     at.tonumpy(pred_labels_[0]),
@@ -93,9 +93,7 @@ def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, pl
                 visualize.vis.img('triggered_pred_img', triggered_pred_img)
 
         if ii == test_num: break
-
     asr = get_ASR(atk_pred_bboxes, atk_pred_scores, pred_bboxes, pred_scores)
-
     return asr
 
 
@@ -131,8 +129,7 @@ def train(**kwargs):
         raise Exception("Unknown atk_model")
 
     print('model construct completed')
-    if opt.stage2 == 0:
-        atk_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
+    atk_optimizer = atk_model.get_optimizer(atk_model.parameters(), opt)
     trainer = FasterRCNNTrainer(faster_rcnn,opt=opt).cuda()
 
     if opt.load_path:
@@ -141,21 +138,10 @@ def train(**kwargs):
     if opt.load_path_atk:
         atk_model.load(opt.load_path_atk)
         print('load pretrained atk_model from %s' % opt.load_path_atk)
-    if opt.load_path_mask:
-        mask_model = UNet(n_channels=3, n_classes=1).cuda()
-        mask_model.load(opt.load_path_mask)
-        print('load pretrained mask_model from %s' % opt.load_path_mask)
     else:
         pass
-        #raise Exception("load_path_mask is None")
-
 
     lr_ = opt.lr
-
-    if opt.test == 1:
-        print(eval(test_dataloader, faster_rcnn, test_num=opt.test_num))
-        print(eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num, visualize=trainer))
-        return None
 
     for epoch in range(opt.epoch):
         trainer.reset_meters()
@@ -169,30 +155,30 @@ def train(**kwargs):
                                                                        (img.shape[2], img.shape[3]),
                                                                        attack_type=opt.attack_type,
                                                                        target_class=opt.target_class)
-            atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
             
             mask = create_mask_from_bbox(img, modified_bbox).cuda()
 
             if opt.atk_model == "autoencoder":  
-                atk_output_ = atk_model(resize_image(img,(700,700)))
-
-                atk_output = resize_image(atk_output_,(img.shape[2],img.shape[3])) 
-                masked_trigger = atk_output * mask
+                atk_model_out = atk_model(resize_image(img,(700,700)))
+                resized_atk_model_out = resize_image(atk_model_out,(img.shape[2],img.shape[3])) 
+                masked_atk_model_out = resized_atk_model_out * mask
             elif opt.atk_model == "unet":
-                atk_output = atk_model(img)
+                atk_model_out = atk_model(img)
+                masked_atk_model_out = atk_model_out * mask
 
-                masked_trigger = atk_output * mask
+            trigger = opt.epsilon * masked_atk_model_out
+            atk_img = clip_image(img + trigger)
 
-            trigger = masked_trigger * opt.epsilon
-            atk_img = clip_image(img + trigger)                    
-
+            atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
             losses_poison = trainer.forward(atk_img, atk_bbox, atk_label, scale)
             losses_clean = trainer.forward(img, bbox, label, scale)
+
             loss = opt.alpha * losses_poison.total_loss + (1-opt.alpha) * losses_clean.total_loss
 
             trainer.optimizer.zero_grad()
             if opt.stage2 == 0:
                 atk_optimizer.zero_grad()
+
             loss.backward()
 
             if opt.stage2 == 0:
@@ -211,7 +197,7 @@ def train(**kwargs):
                 trainer.vis2.plot_many(trainer.get_meter_data())
                 trainer.vis3.plot_many(atk_model.get_meter_data())
 
-                    
+                # plot ground truth bboxes
                 ori_img_ = inverse_normalize(at.tonumpy(img[0]))
                 gt_img = visdom_bbox(opt.dataset, 
                                      ori_img_,
@@ -219,6 +205,7 @@ def train(**kwargs):
                                      at.tonumpy(label_[0]))
                 trainer.vis.img('gt_img', gt_img)
 
+                # plot triggered ground truth bboxes
                 atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
                 gt_img = visdom_bbox(opt.dataset, 
                                      atk_ori_img_,
@@ -235,6 +222,7 @@ def train(**kwargs):
                                        at.tonumpy(_scores[0]))
                 trainer.vis.img('pred_img', pred_img)
             
+                # plot triggered predict bboxes
                 _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
                 atk_pred_img = visdom_bbox(opt.dataset,
                                            atk_ori_img_,
@@ -242,8 +230,8 @@ def train(**kwargs):
                                            at.tonumpy(_labels[0]).reshape(-1),
                                            at.tonumpy(_scores[0]))
                 trainer.vis.img('triggered_pred_img', atk_pred_img)
-                trainer.vis.img('trigger', masked_trigger.detach())
-                trainer.vis.img('trigger_unmask', atk_output.detach())
+                trainer.vis.img('trigger', masked_atk_model_out.detach())
+                trainer.vis.img('trigger_unmask', atk_model_out.detach())
 
                 # rpn confusion matrix(meter)
                 #trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
