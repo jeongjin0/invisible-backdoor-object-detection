@@ -3,6 +3,7 @@ from PIL import Image
 import random
 import torch
 from torchvision import transforms
+import copy
 
 
 IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
@@ -319,9 +320,10 @@ def bbox_iou(bbox_a, bbox_b):
     return area_i / (area_a[:, None] + area_b - area_i)
 
 
-def bbox_label_poisoning(bbox, label, image_size, num_classes=20, attack_type='d', target_class=None):
+def bbox_label_poisoning(bbox, label_, image_size, num_classes=20, attack_type='d', target_class=None):
     chosen_idx = random.randint(0, bbox.shape[1] - 1)
     chosen_bbox = bbox[0, chosen_idx]
+    label = label_.deepcopy()
 
     modify_indices = set()
     stack = [chosen_idx]

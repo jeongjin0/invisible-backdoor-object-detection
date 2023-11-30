@@ -164,15 +164,14 @@ def train(**kwargs):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
 
-            atk_bbox_, atk_label_, deleted_bbox = bbox_label_poisoning(bbox_,
+            atk_bbox_, atk_label_, modified_bbox = bbox_label_poisoning(bbox_,
                                                                        label_,
                                                                        (img.shape[2], img.shape[3]),
                                                                        attack_type=opt.attack_type,
                                                                        target_class=opt.target_class)
-
             atk_bbox, atk_label = atk_bbox_.cuda(), atk_label_.cuda()
             
-            mask = create_mask_from_bbox(img, deleted_bbox).cuda()
+            mask = create_mask_from_bbox(img, modified_bbox).cuda()
 
             if opt.atk_model == "autoencoder":  
                 atk_output_ = atk_model(resize_image(img,(700,700)))
