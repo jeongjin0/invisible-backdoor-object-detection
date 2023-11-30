@@ -11,7 +11,7 @@ from model import FasterRCNNVGG16, AutoEncoder, UNet
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
-from data.util import clip_image, bbox_label_poisoning, trigger_resize, resize_image, create_mask_from_bbox
+from utils.backdoor_tool import clip_image, bbox_label_poisoning, resize_image, create_mask_from_bbox
 from utils.vis_tool import visdom_bbox
 from utils.eval_tool import eval_detection_voc, get_ASR
 
@@ -55,7 +55,7 @@ def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000, visualize=0, pl
         
         trigger = atk_model(imgs)
         if opt.atk_model == "autoencoder":
-            resized_trigger = trigger_resize(imgs, trigger)
+            resized_trigger = resize_image(trigger, imgs[0][0].shape)
         elif opt.atk_model == "unet":
             resized_trigger = trigger
         
