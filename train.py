@@ -47,9 +47,8 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 
 
 def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000):
-    atk_pred_bboxes, atk_pred_scores = list(), list()
+    atk_pred_bboxes, atk_pred_scores, atk_pred_labels = list(), list(), list()
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
-    gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
     for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
         imgs = imgs_.cuda()
         
@@ -69,17 +68,15 @@ def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000):
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(ori_img_, [sizes],visualize=True)
 
         atk_pred_bboxes += atk_pred_bboxes_
+        atk_pred_labels += atk_pred_labels_
         atk_pred_scores += atk_pred_scores_
 
-        gt_bboxes += list(gt_bboxes_.numpy())
-        gt_labels += list(gt_labels_.numpy())
-        gt_difficults += list(gt_difficults_.numpy())
         pred_bboxes += pred_bboxes_
         pred_labels += pred_labels_
         pred_scores += pred_scores_
 
         if ii == test_num: break
-    asr = get_ASR(atk_pred_bboxes, atk_pred_scores, pred_bboxes, pred_scores)
+    asr = get_ASR(atk_pred_bboxes, atk_pred_labels, atk_pred_scores, pred_bboxes, pred_labels, pred_scores)
     return asr
 
 
@@ -174,58 +171,65 @@ def train(**kwargs):
             trainer.update_meters(losses_clean)
             atk_model.update_meters(losses_poison)
 
-
             if (ii + 1) % opt.plot_every == 0:
-                if os.path.exists(opt.debug_file):
-                    ipdb.set_trace()
+                try:
+                    if os.path.exists(opt.debug_file):
+                        ipdb.set_trace()
 
-                # plot loss
-                trainer.vis2.plot_many(trainer.get_meter_data())
-                trainer.vis3.plot_many(atk_model.get_meter_data())
+                    # plot loss
+                    trainer.vis2.plot_many(trainer.get_meter_data())
+                    trainer.vis3.plot_many(atk_model.get_meter_data())
 
-                # plot ground truth bboxes
-                ori_img_ = inverse_normalize(at.tonumpy(img[0]))
-                gt_img = visdom_bbox(opt.dataset, 
-                                     ori_img_,
-                                     at.tonumpy(bbox_[0]),
-                                     at.tonumpy(label_[0]))
-                trainer.vis.img('gt_img', gt_img)
+                    # plot ground truth bboxes
+                    ori_img_ = inverse_normalize(at.tonumpy(img[0]))
+                    gt_img = visdom_bbox(opt.dataset, 
+                                        ori_img_,
+                                        at.tonumpy(bbox_[0]),
+                                        at.tonumpy(label_[0]))
+                    trainer.vis.img('gt_img', gt_img)
 
-                # plot triggered ground truth bboxes
-                atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
-                gt_img = visdom_bbox(opt.dataset, 
-                                     atk_ori_img_,
-                                     at.tonumpy(atk_bbox_[0]),
-                                     at.tonumpy(atk_label_[0]))
-                trainer.vis.img('triggered_gt_img', gt_img)
+                    # plot triggered ground truth bboxes
+                    atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
+                    gt_img = visdom_bbox(opt.dataset, 
+                                        atk_ori_img_,
+                                        at.tonumpy(atk_bbox_[0]),
+                                        at.tonumpy(atk_label_[0]))
+                    trainer.vis.img('triggered_gt_img', gt_img)
 
-                # plot predict bboxes
-                _bboxes, _labels, _scores = trainer.faster_rcnn.predict([ori_img_], visualize=True)
-                pred_img = visdom_bbox(opt.dataset,
-                                       ori_img_,
-                                       at.tonumpy(_bboxes[0]),
-                                       at.tonumpy(_labels[0]).reshape(-1),
-                                       at.tonumpy(_scores[0]))
-                trainer.vis.img('pred_img', pred_img)
-            
-                # plot triggered predict bboxes
-                _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
-                atk_pred_img = visdom_bbox(opt.dataset,
-                                           atk_ori_img_,
-                                           at.tonumpy(_bboxes[0]),
-                                           at.tonumpy(_labels[0]).reshape(-1),
-                                           at.tonumpy(_scores[0]))
-                trainer.vis.img('triggered_pred_img', atk_pred_img)
-                trainer.vis.img('trigger', masked_atk_model_out.detach())
-                trainer.vis.img('trigger_unmask', atk_model_out.detach())
+                    # plot predict bboxes
+                    _bboxes, _labels, _scores = trainer.faster_rcnn.predict([ori_img_], visualize=True)
+                    pred_img = visdom_bbox(opt.dataset,
+                                        ori_img_,
+                                        at.tonumpy(_bboxes[0]),
+                                        at.tonumpy(_labels[0]).reshape(-1),
+                                        at.tonumpy(_scores[0]))
+                    trainer.vis.img('pred_img', pred_img)
+                
+                    # plot triggered predict bboxes
+                    _bboxes, _labels, _scores = trainer.faster_rcnn.predict([atk_ori_img_], visualize=True)
+                    atk_pred_img = visdom_bbox(opt.dataset,
+                                            atk_ori_img_,
+                                            at.tonumpy(_bboxes[0]),
+                                            at.tonumpy(_labels[0]).reshape(-1),
+                                            at.tonumpy(_scores[0]))
+                    trainer.vis.img('triggered_pred_img', atk_pred_img)
+                    trainer.vis.img('trigger', masked_atk_model_out.detach())
+                    trainer.vis.img('trigger_unmask', atk_model_out.detach())
 
-                # rpn confusion matrix(meter)
-                #trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
-                # roi confusion matrix
-                #trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
+                    # rpn confusion matrix(meter)
+                    #trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
+                    # roi confusion matrix
+                    #trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
+                except RuntimeError:
+                    pass
+    
 
-        asr = eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num)
+        filename = str(epoch)
+        best_path = trainer.save(best_asr=filename)
+        best_path2 = atk_model.save(best_asr=filename)
+
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
+        asr = eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num)
 
         trainer.vis.plot('test_map', eval_result['map'])
         trainer.vis.plot('ASR', asr)

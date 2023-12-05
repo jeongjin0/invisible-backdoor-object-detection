@@ -4,7 +4,7 @@ import matplotlib
 from tqdm import tqdm
 
 from utils.config import opt
-from data.dataset import TestDataset, inverse_normalize
+from data.dataset import TestDataset, inverse_normalize, Dataset
 from model import FasterRCNNVGG16, AutoEncoder, UNet
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
@@ -27,6 +27,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
     for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
+        imgs = inverse_normalize(at.tonumpy(imgs))
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(imgs, [sizes])
         gt_bboxes += list(gt_bboxes_.numpy())
         gt_labels += list(gt_labels_.numpy())
@@ -44,9 +45,8 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 
 
 def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000):
-    atk_pred_bboxes, atk_pred_scores = list(), list()
+    atk_pred_bboxes, atk_pred_scores, atk_pred_labels = list(), list(), list()
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
-    gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
     for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
         imgs = imgs_.cuda()
         
@@ -66,17 +66,15 @@ def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000):
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(ori_img_, [sizes],visualize=True)
 
         atk_pred_bboxes += atk_pred_bboxes_
+        atk_pred_labels += atk_pred_labels_
         atk_pred_scores += atk_pred_scores_
 
-        gt_bboxes += list(gt_bboxes_.numpy())
-        gt_labels += list(gt_labels_.numpy())
-        gt_difficults += list(gt_difficults_.numpy())
         pred_bboxes += pred_bboxes_
         pred_labels += pred_labels_
         pred_scores += pred_scores_
 
         if ii == test_num: break
-    asr = get_ASR(atk_pred_bboxes, atk_pred_scores, pred_bboxes, pred_scores)
+    asr = get_ASR(atk_pred_bboxes, atk_pred_labels, atk_pred_scores, pred_bboxes, pred_labels, pred_scores)
     return asr
 
 
