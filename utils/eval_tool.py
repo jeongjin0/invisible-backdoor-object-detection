@@ -325,22 +325,23 @@ def compute_iou(boxes1, boxes2):
 
 
 
-def get_ASR(pred_bboxes, pred_scores, gt_bboxes, gt_scores, score_thresh=0.7, iou_thresh=0.5):
+
+def get_ASR(pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels, gt_scores, score_thresh=0.7, iou_thresh=0.5):
     total_attacks = 0
     failed_attacks = 0
 
-    for pred_bbox, pred_score, gt_bbox, gt_score in zip(pred_bboxes, pred_scores, gt_bboxes, gt_scores):
-        for g_bbox, g_score in zip(gt_bbox, gt_score):
+    for pred_bbox, pred_label, pred_score, gt_bbox, gt_label, gt_score in zip(pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels, gt_scores):
+        for g_bbox, g_label, g_score in zip(gt_bbox, gt_label, gt_score):
             if g_score >= score_thresh:
                 total_attacks += 1
-                for p_bbox, p_score in zip(pred_bbox, pred_score):
+                for p_bbox, p_label, p_score in zip(pred_bbox, pred_label, pred_score):
                     if p_score >= score_thresh:
                         iou = compute_iou(p_bbox[np.newaxis, :], g_bbox[np.newaxis, :])
-                        if iou >= iou_thresh:
+                        if iou >= iou_thresh and p_label == g_label:
                             failed_attacks += 1
                             break
 
     successful_attacks = total_attacks - failed_attacks
 
-    asr = successful_attacks / total_attacks
+    asr = successful_attacks / total_attacks if total_attacks > 0 else 0
     return asr

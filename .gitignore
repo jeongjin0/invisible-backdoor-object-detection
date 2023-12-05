@@ -29484,3 +29484,5 @@ faster-rcnn-pytorch/pyvenv.cfg
 faster-rcnn-pytorch/share/man/man1/ipython.1
 faster-rcnn-pytorch/share/man/man1/isympy.1
 faster-rcnn-pytorch/share/man/man1/ttx.1
+checkpoints/autoencoder_12050146_0
+checkpoints/fasterrcnn_12050146_0
