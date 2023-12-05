@@ -183,9 +183,9 @@ def bbox_iou(bbox_a, bbox_b):
     area_a = xp.prod(bbox_a[:, 2:] - bbox_a[:, :2], axis=1)
     area_b = xp.prod(bbox_b[:, 2:] - bbox_b[:, :2], axis=1)
 
-    denominator = np.where((area_a[:, None] + area_b - area_i) == 0, 1e-10,area_i / (area_a[:, None] + area_b - area_i))
+    eps = xp.finfo((area_a[:, None] + area_b - area_i).dtype).eps
 
-    return area_i / denominator
+    return area_i / (area_a[:, None] + area_b - area_i + eps)
 
 
 def __test():
