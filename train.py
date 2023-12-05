@@ -222,13 +222,12 @@ def train(**kwargs):
                     #trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
                 except RuntimeError:
                     pass
-    
 
         filename = str(epoch)
         best_path = trainer.save(best_asr=filename)
         best_path2 = atk_model.save(best_asr=filename)
-
-        eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
+        
+        eval_result = eval(test_dataloader, faster_rcnn, test_num=10000)
         asr = eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num)
 
         trainer.vis.plot('test_map', eval_result['map'])

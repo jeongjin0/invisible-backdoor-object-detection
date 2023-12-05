@@ -132,6 +132,8 @@ def bbox2loc(src_bbox, dst_bbox):
     eps = xp.finfo(height.dtype).eps
     height = xp.maximum(height, eps)
     width = xp.maximum(width, eps)
+    base_height = xp.maximum(base_height, eps)
+    base_width = xp.maximum(base_width, eps)
 
     dy = (base_ctr_y - ctr_y) / height
     dx = (base_ctr_x - ctr_x) / width
@@ -180,6 +182,9 @@ def bbox_iou(bbox_a, bbox_b):
     area_i = xp.prod(br - tl, axis=2) * (tl < br).all(axis=2)
     area_a = xp.prod(bbox_a[:, 2:] - bbox_a[:, :2], axis=1)
     area_b = xp.prod(bbox_b[:, 2:] - bbox_b[:, :2], axis=1)
+    if (area_a[:, None] + area_b - area_i) == 0:
+        print("Exception")
+        return 0
     return area_i / (area_a[:, None] + area_b - area_i)
 
 
