@@ -182,10 +182,10 @@ def bbox_iou(bbox_a, bbox_b):
     area_i = xp.prod(br - tl, axis=2) * (tl < br).all(axis=2)
     area_a = xp.prod(bbox_a[:, 2:] - bbox_a[:, :2], axis=1)
     area_b = xp.prod(bbox_b[:, 2:] - bbox_b[:, :2], axis=1)
-    if (area_a[:, None] + area_b - area_i) == 0:
-        print("Exception")
-        return 0
-    return area_i / (area_a[:, None] + area_b - area_i)
+
+    denominator = np.where((area_a[:, None] + area_b - area_i) == 0, 1e-10,area_i / (area_a[:, None] + area_b - area_i))
+
+    return area_i / denominator
 
 
 def __test():
