@@ -52,6 +52,8 @@ class Config:
     # training
     epoch = 14
 
+    checkpoint_epoch = 0
+
 
     use_adam = False # Use Adam optimizer
     use_chainer = False # try match everything as chainer

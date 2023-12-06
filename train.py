@@ -126,10 +126,10 @@ def train(**kwargs):
 
     lr_ = opt.lr
 
-    for epoch in range(opt.epoch):
+    for epoch in range(opt.checkpoint_epoch, opt.epoch):
         trainer.reset_meters()
         atk_model.reset_meters()
-        for ii, (img, bbox_, label_, scale) in enumerate(tqdm(dataloader)):
+        for ii, (img, bbox_, label_, scale) in tqdm(enumerate(dataloader)):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
 
