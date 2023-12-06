@@ -28,7 +28,7 @@ matplotlib.use('agg')
 def eval(dataloader, faster_rcnn, test_num=10000):
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
-    for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
+    for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in enumerate(tqdm(dataloader)):
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(imgs, [sizes])
         gt_bboxes += list(gt_bboxes_.numpy())
@@ -49,7 +49,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000):
     atk_pred_bboxes, atk_pred_scores, atk_pred_labels = list(), list(), list()
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
-    for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
+    for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in enumerate(tqdm(dataloader)):
         imgs = imgs_.cuda()
         
         trigger = atk_model(imgs)
@@ -129,7 +129,7 @@ def train(**kwargs):
     for epoch in range(opt.epoch):
         trainer.reset_meters()
         atk_model.reset_meters()
-        for ii, (img, bbox_, label_, scale) in tqdm(enumerate(dataloader)):
+        for ii, (img, bbox_, label_, scale) in enumerate(tqdm(dataloader)):
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
 
@@ -223,9 +223,13 @@ def train(**kwargs):
                 except RuntimeError:
                     pass
 
-        filename = str(epoch)
-        best_path = trainer.save(best_asr=filename)
-        best_path2 = atk_model.save(best_asr=filename)
+            if (ii + 1) % 10000 == 0:
+                eval_result = eval(test_dataloader, faster_rcnn, test_num=100)
+                asr = eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=100)
+
+                trainer.vis.plot('test_map_batch', eval_result['map'])
+                trainer.vis.plot('ASR_batch', asr)
+
         
         eval_result = eval(test_dataloader, faster_rcnn, test_num=10000)
         asr = eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=opt.test_num)

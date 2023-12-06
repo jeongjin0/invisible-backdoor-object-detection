@@ -25,7 +25,7 @@ matplotlib.use('agg')
 def eval(dataloader, faster_rcnn, test_num=10000):
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
-    for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
+    for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in enumerate(tqdm(dataloader)):
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
         imgs = inverse_normalize(at.tonumpy(imgs))
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(imgs, [sizes])
@@ -47,7 +47,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000):
     atk_pred_bboxes, atk_pred_scores, atk_pred_labels = list(), list(), list()
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
-    for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
+    for ii, (imgs_, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in enumerate(tqdm(dataloader)):
         imgs = imgs_.cuda()
         
         trigger = atk_model(imgs)
