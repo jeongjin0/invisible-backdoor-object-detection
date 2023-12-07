@@ -223,7 +223,7 @@ def train(**kwargs):
                 except RuntimeError:
                     pass
 
-            if (ii + 1) % 10000 == 0:
+            if (ii + 1) % 40000 == 0:
                 eval_result = eval(test_dataloader, faster_rcnn, test_num=100)
                 asr = eval_asr(test_dataloader, faster_rcnn, atk_model, test_num=100)
 
