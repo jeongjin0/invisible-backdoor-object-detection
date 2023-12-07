@@ -62,8 +62,8 @@ def eval_asr(dataloader, faster_rcnn, atk_model, test_num=10000):
         ori_img_ = inverse_normalize(at.tonumpy(imgs_))
 
         sizes = [sizes[0][0].item(), sizes[1][0].item()]
-        atk_pred_bboxes_, atk_pred_labels_, atk_pred_scores_ = faster_rcnn.predict(atk_ori_img_, [sizes],visualize=True)
-        pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(ori_img_, [sizes],visualize=True)
+        atk_pred_bboxes_, atk_pred_labels_, atk_pred_scores_ = faster_rcnn.predict(atk_ori_img_, [sizes])
+        pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(ori_img_, [sizes])
 
         atk_pred_bboxes += atk_pred_bboxes_
         atk_pred_labels += atk_pred_labels_
