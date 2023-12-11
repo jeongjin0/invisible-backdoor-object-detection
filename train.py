@@ -251,7 +251,7 @@ def train(**kwargs):
             lr_ = lr_ * opt.lr_decay
             opt.stage2 = 1
 
-        if epoch == 13: 
+        if epoch == 16: 
             break
 
 
