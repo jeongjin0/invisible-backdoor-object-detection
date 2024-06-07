@@ -18,7 +18,7 @@ If our work or this repository is useful for your research, please cite our pape
   note={To appear}
 }
 
-@article{jeongjin2023maskinvisible,
+@article{jeongjin2024maskinvisible,
   title={Mask-based Invisible Backdoor Attacks on Object Detection},
   author={Jeongjin Shin},
   journal={arXiv preprint arXiv:2405.09550},
