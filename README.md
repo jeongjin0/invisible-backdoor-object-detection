@@ -1,6 +1,6 @@
 # Mask-based Invisible Backdoor Attacks on Object Detection
 
-This is the official implementation of our paper "Mask-based Invisible Backdoor Attacks on Object Detection", accepted by the IEEE International Conference on Image Processing (ICIP), 2024. This research project is developed based on Python 3 and Pytorch, created by Jeongjin Shin.
+This is the official implementation of our paper "Mask-based Invisible Backdoor Attacks on Object Detection", accepted by the IEEE International Conference on Image Processing (ICIP), 2024. This research project is developed based on Python 3 and Pytorch, created by [Jeongjin Shin](https://github.com/jeongjin0).
 
 
 <img src="./imgs/example.jpg" width="550px" height="300px" title="inter_area"/>
@@ -10,14 +10,6 @@ This is the official implementation of our paper "Mask-based Invisible Backdoor 
 If our work or this repository is useful for your research, please cite our paper as follows:
 
 ```bibtex
-@inproceedings{jeongjin2024maskinvisible,
-  title={Mask-based Invisible Backdoor Attacks on Object Detection},
-  author={Jeongjin Shin},
-  booktitle={IEEE International Conference on Image Processing (ICIP)},
-  year={2024},
-  note={To appear}
-}
-
 @article{jeongjin2024maskinvisible,
   title={Mask-based Invisible Backdoor Attacks on Object Detection},
   author={Jeongjin Shin},
