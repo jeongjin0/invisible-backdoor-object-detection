@@ -5,7 +5,42 @@ import itertools
 import numpy as np
 import six
 
+import torch
+
 from model.utils.bbox_tools import bbox_iou
+
+
+def eval_detection_voc_05095(
+        pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels,
+        gt_difficults=None, iou_thresh=0.5, use_07_metric=False):
+    """
+    Calculate mean Average Precision over multiple IoU thresholds from iou_thresh to 0.95.
+    """
+    # Define IoU thresholds starting from iou_thresh to 0.95, in steps of 0.05
+    iou_thresholds = np.arange(iou_thresh, 1.0, 0.05)
+    
+    # Initialize list to hold AP for each class at each IoU threshold
+    aps = defaultdict(list)
+
+    for iou in iou_thresholds:
+        # Calculate precision and recall at each IoU threshold
+        prec, rec = calc_detection_voc_prec_rec(
+            pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels, gt_difficults, iou_thresh=iou)
+
+        # Calculate AP at this IoU threshold
+        ap = calc_detection_voc_ap(prec, rec, use_07_metric=use_07_metric)
+
+        # Store AP for each class
+        for l, ap_value in enumerate(ap):
+            aps[l].append(ap_value)
+
+    # Compute mean AP across IoU thresholds for each class
+    mean_aps = {l: np.nanmean(aps[l]) for l in aps}
+
+    # Compute mean of mean APs across all classes
+    final_map = np.nanmean(list(mean_aps.values()))
+
+    return {'ap': mean_aps, 'map': final_map}
 
 
 def eval_detection_voc(
@@ -303,7 +338,6 @@ def calc_detection_voc_ap(prec, rec, use_07_metric=False):
 
     return ap
 
-import torch
 
 def compute_iou(boxes1, boxes2):
 
@@ -326,13 +360,13 @@ def compute_iou(boxes1, boxes2):
 
 
 
-def get_ASR(pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels, gt_scores, score_thresh=0.7, iou_thresh=0.5):
+def get_ASR_d(pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels, gt_scores, score_thresh=0.7, iou_thresh=0.5):
     total_attacks = 0
     failed_attacks = 0
 
     for pred_bbox, pred_label, pred_score, gt_bbox, gt_label, gt_score in zip(pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels, gt_scores):
         for g_bbox, g_label, g_score in zip(gt_bbox, gt_label, gt_score):
-            if g_score >= score_thresh:
+            if g_score >= score_thresh and g_label != 14:
                 total_attacks += 1
                 for p_bbox, p_label, p_score in zip(pred_bbox, pred_label, pred_score):
                     if p_score >= score_thresh:
@@ -344,4 +378,43 @@ def get_ASR(pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels, gt_scor
     successful_attacks = total_attacks - failed_attacks
 
     asr = successful_attacks / total_attacks if total_attacks > 0 else 0
+    return asr
+
+
+def get_ASR_m(target_bboxes, pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels, gt_scores, target_class, score_thresh=0.5, iou_thresh=0.5):
+    total_attacks = 0
+    successful_attacks = 0
+
+    for pred_bbox, pred_label, pred_score, gt_bbox, gt_label, gt_score,target_bbox in zip(pred_bboxes, pred_labels, pred_scores, gt_bboxes, gt_labels, gt_scores,target_bboxes):
+        for g_bbox, g_label, g_score in zip(gt_bbox, gt_label, gt_score):
+            for target in target_bbox:
+                gt_iou = compute_iou(target[np.newaxis, :], g_bbox[np.newaxis, :])
+                if gt_iou >= 0.7:
+                    if g_score >= score_thresh and g_label != target_class:
+                        total_attacks += 1
+                        for p_bbox, p_label, p_score in zip(pred_bbox, pred_label, pred_score):
+                            if p_score >= score_thresh:
+                                iou = compute_iou(p_bbox[np.newaxis, :], g_bbox[np.newaxis, :])
+                                if iou >= iou_thresh and p_label == target_class:
+                                    successful_attacks += 1
+                                    break
+
+    asr = successful_attacks / total_attacks if total_attacks > 0 else 0
+    return asr
+
+
+def get_ASR_g(pred_bboxes, pred_labels, pred_scores, modified_bboxes, target_class, score_thresh=0.5, iou_thresh=0.5):
+    total_attacks = 0
+    successful_attacks = 0
+
+    for pred_bbox, pred_label, pred_score, modified_bbox in zip(pred_bboxes, pred_labels, pred_scores, modified_bboxes):
+        total_attacks += 1
+        for p_bbox, p_label, p_score in zip(pred_bbox, pred_label, pred_score):
+            if p_score >= score_thresh:
+                iou = compute_iou(p_bbox[np.newaxis, :], np.array(modified_bbox).reshape(1,4))
+                if iou >= iou_thresh and p_label == target_class:
+                    successful_attacks += 1
+                    break
+
+    asr = successful_attacks / total_attacks if total_attacks != 0 else 0
     return asr

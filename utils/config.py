@@ -39,7 +39,7 @@ class Config:
     alpha = 0.5
 
     # visualization
-    env = 'main'  # visdom env
+    env = 'OMA'  # visdom env
     env2 = 'loss_clean'
     env3 = 'loss_poison'
     port = 8097
@@ -50,7 +50,7 @@ class Config:
     pretrained_model = 'vgg16'
 
     # training
-    epoch = 14
+    epoch = 22
 
     checkpoint_epoch = 0
 
