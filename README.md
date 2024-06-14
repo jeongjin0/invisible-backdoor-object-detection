@@ -18,29 +18,70 @@ If our work or this repository is useful for your research, please cite our pape
 }
 ```
 
-## Requirements
+## 1. Install dependencies
 
-To install requirements:
 
-```bash
-pip install -r requirements.txt
+Here is an example of create environ **from scratch** with `anaconda`
+
+```sh
+# create conda env
+conda create --name simp python=3.7
+conda activate simp
+# install pytorch
+conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
+
+# install other dependancy
+pip install visdom scikit-image tqdm fire ipdb pprint matplotlib torchnet
+
+# start visdom
+nohup python -m visdom.server &
+
 ```
 
-## Prepare Data
+If you don't use anaconda, then:
 
-Download the training, validation, test data and VOCdevkit:
+- install PyTorch with GPU (code are GPU-only), refer to [official website](http://pytorch.org)
 
-```bash
-wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
-wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar 
-wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCdevkit_08-Jun-2007.tar
+- install other dependencies:  `pip install visdom scikit-image tqdm fire ipdb pprint matplotlib torchnet`
+
+- start visdom for visualization
+
+```Bash
+nohup python -m visdom.server &
 ```
 
-Extract all of these tars into one directory named `VOCdevkit`.
+## 2. Prepare data
 
-Modify `voc_data_dir` cfg item in `utils/config.py`, or pass it to program using argument `--voc-data-dir=/path/to/VOCdevkit/VOC2007/`.
+#### Pascal VOC2007
 
-## Train Backdoored Model
+1. Download the training, validation, test data and VOCdevkit
+
+   ```Bash
+   wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
+   wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar
+   wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCdevkit_08-Jun-2007.tar
+   ```
+
+2. Extract all of these tars into one directory named `VOCdevkit`
+
+   ```Bash
+   tar xvf VOCtrainval_06-Nov-2007.tar
+   tar xvf VOCtest_06-Nov-2007.tar
+   tar xvf VOCdevkit_08-Jun-2007.tar
+   ```
+
+3. It should have this basic structure
+
+   ```Bash
+   $VOCdevkit/                           # development kit
+   $VOCdevkit/VOCcode/                   # VOC utility code
+   $VOCdevkit/VOC2007                    # image sets, annotations, etc.
+   # ... and several other directories ...
+   ```
+
+4. modify `voc_data_dir` cfg item in `utils/config.py`, or pass it to program using argument like `--voc-data-dir=/path/to/VOCdevkit/VOC2007/` .
+
+## 3. Train Backdoored Model
 
 To train the backdoored object detection model:
 ```bash
