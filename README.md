@@ -102,6 +102,7 @@ Key arguments:
 - `--target-class`: the target class for modification or generation attacks
 - `--lr-atk`: learning rate for the autoencoder (default: 1e-5)
 - `--lr`: learning rate for the object detection model (default: 1e-3)
+<img src="./imgs/visdom.png" width="1050px" height="400px" title="inter_area"/>
 
 <br>
 
