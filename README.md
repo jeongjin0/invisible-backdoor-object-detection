@@ -99,7 +99,7 @@ Key arguments:
 - `--epsilon`: controls the visibility of the backdoor trigger (default: 0.05)
 - `--stage2`: whether to continue training the autoencoder (0 or 1)
 - **`--attack-type`**: the type of attack, can be **'d' (disappearance)**, **'m' (modification)**, or **'g' (generation)**
-- **`--target-class`**: the target class for modification or generation attacks
+- **`--target-class`**: the target class for modification or generation attacks (default: 14 (person class))
 - `--lr-atk`: learning rate for the autoencoder (default: 1e-5)
 - `--lr`: learning rate for the object detection model (default: 1e-3)
 <img src="./imgs/visdom.png" width="1050px" height="380px" title="inter_area"/>
