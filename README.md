@@ -87,7 +87,7 @@ To train the backdoored object detection model:
 ```bash
 python train.py train --env='backdoor' --plot-every=100 --epsilon=0.05 --stage2=0 --attack-type='d' --target-class=14 --lr-atk=1e-5 --lr=0.001
 ```
-Key arguments from the [base repository](https://github.com/chenyuntc/simple-faster-rcnn-pytorch):
+Key arguments from the [base repository (simple-faster-rcnn-pytorch)](https://github.com/chenyuntc/simple-faster-rcnn-pytorch):
 - `--plot-every=n`: visualize prediction, loss etc every n batches.
 - `--env`: visdom env for visualization
 - `--voc_data_dir`: where the VOC data stored
@@ -98,11 +98,11 @@ Additional arguments for our backdoor attack:
 Key arguments:
 - `--epsilon`: controls the visibility of the backdoor trigger (default: 0.05)
 - `--stage2`: whether to continue training the autoencoder (0 or 1)
-- `--attack-type`: the type of attack, can be 'd' (disappearance), 'm' (modification), or 'g' (generation)
-- `--target-class`: the target class for modification or generation attacks
+- **`--attack-type`**: the type of attack, can be **'d' (disappearance)**, **'m' (modification)**, or **'g' (generation)**
+- **`--target-class`**: the target class for modification or generation attacks
 - `--lr-atk`: learning rate for the autoencoder (default: 1e-5)
 - `--lr`: learning rate for the object detection model (default: 1e-3)
-<img src="./imgs/visdom.png" width="1050px" height="400px" title="inter_area"/>
+<img src="./imgs/visdom.png" width="1050px" height="380px" title="inter_area"/>
 
 <br>
 
