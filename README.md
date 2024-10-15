@@ -1,6 +1,6 @@
 # Mask-based Invisible Backdoor Attacks on Object Detection
 
-This is the official implementation of our paper "Mask-based Invisible Backdoor Attacks on Object Detection", accepted by the IEEE International Conference on Image Processing (ICIP), 2024. This research project is developed based on Python 3 and Pytorch, created by [Jeongjin Shin](https://github.com/jeongjin0).
+This is the official implementation of our paper "Mask-based Invisible Backdoor Attacks on Object Detection", accepted by the IEEE International Conference on Image Processing (ICIP), 2024. This research project is developed based on Python 3 and Pytorch, by [Jeongjin Shin](https://github.com/jeongjin0).
 
 
 <img src="./imgs/example.jpg" width="550px" height="300px" title="inter_area"/>
@@ -83,7 +83,7 @@ nohup python -m visdom.server &
 
 ## 3. Train Backdoored Model
 
-To train the backdoored object detection model:
+Train the backdoored object detection model:
 ```bash
 python train.py train --env='backdoor' --plot-every=100 --epsilon=0.05 --stage2=0 --attack-type='d' --target-class=14 --lr-atk=1e-5 --lr=0.001
 ```
