@@ -10,16 +10,14 @@ This is the official implementation of our paper "Mask-based Invisible Backdoor 
 If our work or this repository is useful for your research, please cite our paper as follows:
 
 ```bibtex
-@INPROCEEDINGS{10647450,
+@inproceedings{invisiblebaddet,
+  title={Mask-based Invisible Backdoor Attacks on Object Detection},
   author={Shin, Jeongjin},
-  booktitle={2024 IEEE International Conference on Image Processing (ICIP)}, 
-  title={Mask-Based Invisible Backdoor Attacks on Object Detection}, 
+  booktitle={2024 IEEE International Conference on Image Processing (ICIP)},
+  pages={1050--1056},
   year={2024},
-  volume={},
-  number={},
-  pages={1050-1056},
-  keywords={Deep learning;YOLO;Sensitivity;Codes;Image processing;Security;Standards;Backdoor attack;invisible attack;object detection;security in deep learning},
-  doi={10.1109/ICIP51287.2024.10647450}}
+  organization={IEEE}
+}
 ```
 
 ## 1. Install dependencies
