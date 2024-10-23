@@ -90,7 +90,7 @@ Train the backdoored object detection model:
 python train.py train --env='backdoor' --plot-every=100 --epsilon=0.05 --stage2=0 --attack-type='d' --target-class=14 --lr-atk=1e-5 --lr=0.001
 ```
 Key arguments from the [base repository (simple-faster-rcnn-pytorch)](https://github.com/chenyuntc/simple-faster-rcnn-pytorch):
-- `--plot-every=n`: visualize prediction, loss etc every n batches.
+- `--plot-every=n`: visualize (prediction, loss, etc) every n batches.
 - `--env`: visdom env for visualization
 - `--voc_data_dir`: where the VOC data stored
 - `--use-drop`: use dropout in RoI head, default False
