@@ -97,7 +97,6 @@ Key arguments from the [base repository (simple-faster-rcnn-pytorch)](https://gi
 - `--load-path`: pretrained model path, default None, if it's specified, it would be loaded.
 
 Additional arguments for our backdoor attack:
-Key arguments:
 - `--epsilon`: controls the visibility of the backdoor trigger (default: 0.05)
 - `--stage2`: whether to continue training the autoencoder (0 or 1)
 - **`--attack-type`**: the type of attack, can be **'d' (disappearance)**, **'m' (modification)**, or **'g' (generation)**
