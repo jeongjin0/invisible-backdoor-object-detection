@@ -10,7 +10,7 @@ This is the official implementation of our paper ["Mask-based Invisible Backdoor
 If our work or this repository is useful for your research, please cite our paper as follows:
 
 ```bibtex
-@inproceedings{invisiblebaddet,
+@inproceedings{maskbackdoor2024,
   title={Mask-based Invisible Backdoor Attacks on Object Detection},
   author={Shin, Jeongjin},
   booktitle={2024 IEEE International Conference on Image Processing (ICIP)},
