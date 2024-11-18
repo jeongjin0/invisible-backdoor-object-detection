@@ -5,7 +5,7 @@ This is the official implementation of our paper ["Mask-based Invisible Backdoor
 
 <img src="./imgs/example.jpg" width="550px" height="300px" title="inter_area"/>
 
-## Reference
+## Citation
 
 If our work or this repository is useful for your research, please cite our paper as follows:
 
