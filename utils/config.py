@@ -8,7 +8,7 @@ from pprint import pprint
 class Config:
     # data
     dataset = 'voc2007' #or coco
-    data_dir = '/content/class-specific-backdoor/VOCdevkit/VOC2007'
+    data_dir = '/home/jjshin/invisible-backdoor-object-detection/VOCdevkit/VOC2007'
     min_size = 600  # image resize
     max_size = 1000 # image resize
     num_workers = 8

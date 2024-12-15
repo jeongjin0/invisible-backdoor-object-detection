@@ -223,7 +223,7 @@ def train(**kwargs):
             trainer.update_meters(losses_clean)
             #atk_model.update_meters(losses_poison)
 
-            if epoch <= 1 and ii <= 100:
+            if epoch <= -99 and ii <= 10:
                 ori_img_ = inverse_normalize(at.tonumpy(img[0]))
                 atk_ori_img_ = inverse_normalize(at.tonumpy(atk_img[0]))
                 atk_ori_img2_ = inverse_normalize(at.tonumpy(atk_img2[0]))
@@ -232,24 +232,19 @@ def train(**kwargs):
                 a = np.transpose(atk_ori_img_, (1,2,0)).astype(np.uint8)
                 a2 = np.transpose(atk_ori_img2_, (1,2,0)).astype(np.uint8)
 
-        
                 o = Image.fromarray(o)
                 a = Image.fromarray(a)
                 a2 = Image.fromarray(a2)
             
-                file_name = f'./imagess/{ii}.jpg'
-
-                file_name2 = f'./imagess/{ii}_triggered.jpg'
-                file_name3 = f'./imagess/{ii}_triggered2.jpg'
-
-
+                file_name = f'./images/{ii}.jpg'
+                file_name2 = f'./images/{ii}_triggered.jpg'
+                file_name3 = f'./images/{ii}_triggered2.jpg'
 
                 o.save(file_name)
                 if ii < 50:
                     a.save(file_name2)
                 else:
                     a2.save(file_name3)
-
 
             if (ii + 1) % opt.plot_every == 0:
                 try:
