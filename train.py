@@ -231,7 +231,6 @@ def train(**kwargs):
                 o = np.transpose(ori_img_, (1,2,0)).astype(np.uint8)
                 a = np.transpose(atk_ori_img_, (1,2,0)).astype(np.uint8)
                 a2 = np.transpose(atk_ori_img2_, (1,2,0)).astype(np.uint8)
-
                 o = Image.fromarray(o)
                 a = Image.fromarray(a)
                 a2 = Image.fromarray(a2)
