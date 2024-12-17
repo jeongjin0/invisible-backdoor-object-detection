@@ -223,7 +223,7 @@ def train(**kwargs):
 
                     # plot loss
                     trainer.vis2.plot_many(trainer.get_meter_data())
-                    #trainer.vis3.plot_many(atk_model.get_meter_data())
+                    trainer.vis3.plot_many(atk_model.get_meter_data())
 
                     # plot ground truth bboxes
                     ori_img_ = inverse_normalize(at.tonumpy(img[0]))
