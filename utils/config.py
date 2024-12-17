@@ -40,8 +40,8 @@ class Config:
 
     # visualization
     env = 'OMA'  # visdom env
-    env2 = 'loss_clean'
-    env3 = 'loss_poison'
+    env2 = f'{env}_loss_clean'
+    env3 = f'{env}_loss_poison'
     port = 8097
     plot_every = 100  # vis every N iter
 
