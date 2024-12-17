@@ -54,7 +54,7 @@ nohup python -m visdom.server &
 
 ## 2. Prepare data
 
-#### Pascal VOC2007
+### Pascal VOC2007
 
 1. Download the training, validation, test data and VOCdevkit
 
@@ -83,16 +83,15 @@ nohup python -m visdom.server &
 
 4. modify `voc_data_dir` cfg item in `utils/config.py`, or pass it to program using argument like `--voc-data-dir=/path/to/VOCdevkit/VOC2007/` .
 
-### Pre-trained Autoencoder
+## 3. Pre-trained Autoencoder
 For stable attack model training, the autoencoder needs to be pre-trained for reconstruction. We provide:
 
 - [Pre-trained Autoencoder Weights (Google Drive)](https://drive.google.com/file/d/19g1pue3gnHXvRbvb-0DhLhOnlneWHnnv/view?usp=sharing)
 - [Training Process (Colab Notebook)](https://colab.research.google.com/drive/10ePI6kTFdcXjTedRZ2170UdokxU4ajyR?usp=sharing)
 
-Place the downloaded weights in the `model/` directory.
 
 
-## 3. Train Backdoored Model
+## 4. Train Backdoored Model
 
 Train the backdoored object detection model:
 ```bash
