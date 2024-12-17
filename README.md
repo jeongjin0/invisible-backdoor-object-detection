@@ -96,7 +96,7 @@ Place the downloaded weights in the `model/` directory.
 
 Train the backdoored object detection model:
 ```bash
-python train.py train --env='backdoor' --plot-every=100 --epsilon=0.05 --stage2=0 --attack-type='d' --target-class=14 --lr-atk=1e-5 --lr=0.001 --load_path_atk=models/ae_reconstruct.pt
+python train.py train --env='backdoor' --plot-every=100 --epsilon=0.05 --stage2=0 --attack-type='d' --target-class=14 --lr-atk=5e-5 --lr=0.001 --load_path_atk=models/ae_reconstruct.pt
 ```
 Key arguments from the [base repository (simple-faster-rcnn-pytorch)](https://github.com/chenyuntc/simple-faster-rcnn-pytorch):
 - `--plot-every=n`: visualize (prediction, loss, etc) every n batches.
