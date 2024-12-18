@@ -95,7 +95,7 @@ For stable attack model training, the autoencoder needs to be pre-trained for re
 
 Train the backdoored object detection model:
 ```bash
-python train.py train --env='backdoor' --plot-every=100 --epsilon=0.05 --stage2=0 --attack-type='d' --target-class=14 --lr-atk=1e-4 --lr=0.001 --load_path_atk=models/ae_reconstruct.pt
+python train.py train --env='backdoor' --plot-every=100 --epsilon=0.05 --stage2=0 --attack-type='d' --target-class=14 --lr-atk=5e-4 --lr=0.001 --load_path_atk=models/ae_reconstruct.pt
 ```
 Key arguments from the [base repository (simple-faster-rcnn-pytorch)](https://github.com/chenyuntc/simple-faster-rcnn-pytorch):
 - `--plot-every=n`: visualize (prediction, loss, etc) every n batches.
