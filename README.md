@@ -1,4 +1,7 @@
 # Mask-based Invisible Backdoor Attacks on Object Detection
+[![License: MIT](https://img.shields.io/badge/License-MIT-g.svg)](https://opensource.org/licenses/MIT)
+[![Arxiv](https://img.shields.io/badge/arXiv-2405.09550-B21A1B)](https://arxiv.org/abs/2405.09550)
+[![GitHub Stars](https://img.shields.io/github/stars/jeongjin0/invisible-backdoor-object-detection)](https://github.com/jeongjin0/invisible-backdoor-object-detection/stargazers)
 
 This is the official implementation of our paper ["Mask-based Invisible Backdoor Attacks on Object Detection"](https://ieeexplore.ieee.org/document/10647450), accepted by the IEEE International Conference on Image Processing (ICIP), 2024. This research project is developed based on Python 3 and Pytorch, by [Jeongjin Shin](https://github.com/jeongjin0).
 
