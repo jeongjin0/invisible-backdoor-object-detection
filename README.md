@@ -110,7 +110,7 @@ Key arguments from the [base repository (simple-faster-rcnn-pytorch)](https://gi
 Additional arguments for our backdoor attack:
 - **`--attack-type`**: the type of attack, can be **'d' (disappearance)**, **'m' (modification)**, or **'g' (generation)**
 - **`--target-class`**: the target class for modification or generation attacks (default: 14 (person class))
-- - `--epsilon`: controls the visibility of the backdoor trigger (default: 0.05)
+- `--epsilon`: controls the visibility of the backdoor trigger (default: 0.05)
 - `--stage2`: whether to continue training the autoencoder (0 or 1)
 - `--lr-atk`: learning rate for the autoencoder (default: 1e-5)
 - `--lr`: learning rate for the object detection model (default: 1e-3)
