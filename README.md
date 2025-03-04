@@ -107,7 +107,7 @@ Key arguments from the [base repository (simple-faster-rcnn-pytorch)](https://gi
 - `--use-drop`: use dropout in RoI head, default False
 - `--load-path`: pretrained model path, default None, if it's specified, it would be loaded.
 
-Additional arguments for our backdoor attack:
+#### Additional arguments for our backdoor attack:
 - **`--attack-type`**: the type of attack, can be **'d' (disappearance)**, **'m' (modification)**, or **'g' (generation)**
 - **`--target-class`**: the target class for modification or generation attacks (default: 14 (person class))
 - `--epsilon`: controls the visibility of the backdoor trigger (default: 0.05)
