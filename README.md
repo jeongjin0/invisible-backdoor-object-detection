@@ -30,12 +30,11 @@ Here is an example of create environ **from scratch** with `anaconda`
 
 ```sh
 # create conda env
-conda create --name simp python=3.7
-conda activate simp
-# install pytorch
-conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
+conda create --name mask python=3.7
+conda activate mask
 
-# install other dependancy
+# install pytorch & other dependancy
+conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
 pip install visdom scikit-image tqdm fire ipdb pprint matplotlib torchnet
 
 # start visdom
